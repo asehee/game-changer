@@ -18,7 +18,7 @@ const user_entity_1 = require("../users/user.entity");
 const game_entity_1 = require("../games/game.entity");
 let PlaySession = class PlaySession {
     static _OPENAPI_METADATA_FACTORY() {
-        return { id: { required: true, type: () => String }, userId: { required: true, type: () => String }, gameId: { required: true, type: () => String }, status: { required: true, enum: require("../common/enums/session-status.enum").SessionStatus }, expiresAt: { required: true, type: () => Date }, lastHeartbeatAt: { required: true, type: () => Date }, billingStatus: { required: true, enum: require("../common/enums/billing-status.enum").BillingStatus }, createdAt: { required: true, type: () => Date }, updatedAt: { required: true, type: () => Date }, user: { required: true, type: () => require("../users/user.entity").User }, game: { required: true, type: () => require("../games/game.entity").Game } };
+        return { id: { required: true, type: () => String }, userId: { required: true, type: () => String }, gameId: { required: true, type: () => String }, status: { required: true, enum: require("../common/enums/session-status.enum").SessionStatus }, expiresAt: { required: true, type: () => Date }, lastHeartbeatAt: { required: true, type: () => Date }, tokenRenewalCount: { required: true, type: () => Number }, billingStatus: { required: true, enum: require("../common/enums/billing-status.enum").BillingStatus }, createdAt: { required: true, type: () => Date }, updatedAt: { required: true, type: () => Date }, user: { required: true, type: () => require("../users/user.entity").User }, game: { required: true, type: () => require("../games/game.entity").Game } };
     }
 };
 exports.PlaySession = PlaySession;
@@ -51,6 +51,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'datetime', nullable: true }),
     __metadata("design:type", Date)
 ], PlaySession.prototype, "lastHeartbeatAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', default: 0 }),
+    __metadata("design:type", Number)
+], PlaySession.prototype, "tokenRenewalCount", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'enum',

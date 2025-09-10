@@ -9,6 +9,7 @@ export declare class PlaySession {
     status: SessionStatus;
     expiresAt: Date;
     lastHeartbeatAt: Date;
+    tokenRenewalCount: number;
     billingStatus: BillingStatus;
     createdAt: Date;
     updatedAt: Date;

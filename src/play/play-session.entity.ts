@@ -40,6 +40,9 @@ export class PlaySession {
   @Column({ type: 'datetime', nullable: true })
   lastHeartbeatAt: Date;
 
+  @Column({ type: 'int', default: 0 })
+  tokenRenewalCount: number;
+
   @Column({
     type: 'enum',
     enum: BillingStatus,

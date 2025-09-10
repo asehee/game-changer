@@ -98,6 +98,12 @@ export class PlayService {
       throw new UnauthorizedException('Session not found or expired');
     }
 
+    if (session.tokenRenewalCount >= 3) {
+      this.logger.warn(`Heartbeat failed: session ${sessionId} exceeded renewal limit`);
+      await this.revokeSession(sessionId, BillingStatus.STOPPED);
+      throw new ForbiddenException('Token renewal limit exceeded');
+    }
+
     const billingStatus = await this.billingService.checkStream(sessionId);
     if (billingStatus !== BillingStatus.OK) {
       await this.revokeSession(sessionId, BillingStatus.STOPPED);
@@ -110,6 +116,7 @@ export class PlayService {
     session.lastHeartbeatAt = new Date();
     session.expiresAt = new Date(Date.now() + ttlSeconds * 1000);
     session.billingStatus = billingStatus;
+    session.tokenRenewalCount += 1;
 
     await this.sessionRepository.save(session);
 
@@ -120,7 +127,7 @@ export class PlayService {
       hb: heartbeatInterval,
     });
 
-    this.logger.log(`Heartbeat success: session ${sessionId}`);
+    this.logger.log(`Heartbeat success: session ${sessionId}, renewal count: ${session.tokenRenewalCount}`);
 
     return newToken;
   }

@@ -30,7 +30,7 @@ export const getDatabaseConfig = (
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'mysql',
-  url: process.env.DATABASE_URL || 'mysql://root:password@localhost:3306/game_platform',
+  url: process.env.DATABASE_URL || 'mysql://root@localhost:3306/game_platform',
   entities: [path.join(__dirname, '..', '**', '*.entity.{ts,js}')],
   migrations: [path.join(__dirname, '..', '..', 'migrations', '*.{ts,js}')],
   synchronize: false,
