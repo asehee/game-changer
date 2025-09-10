@@ -138,24 +138,3 @@ npm run test:cov
 5. 서명된 URL을 사용한 CDN 구성 (선택사항)
 6. 모니터링 및 로깅 설정
 7. 세션 기반 오토스케일링 구성
-
-## MySQL 개발 환경 설정
-
-### XAMPP 사용 (권장)
-
-1. [XAMPP](https://www.apachefriends.org/) 다운로드 및 설치
-2. XAMPP Control Panel에서 MySQL 시작
-3. phpMyAdmin에서 `game_platform` 데이터베이스 생성
-4. `.env` 파일의 `DATABASE_URL` 확인
-
-### MySQL 직접 설치
-
-```bash
-# MySQL 설치 후
-mysql -u root -p
-CREATE DATABASE game_platform;
-```
-
-## 라이선스
-
-Proprietary
