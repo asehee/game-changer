@@ -1,140 +1,161 @@
-# Game Platform Backend
+# 게임 플랫폼 백엔드
 
-NestJS v10 + TypeScript + TypeORM backend for secure game session management and asset streaming.
+보안 게임 세션 관리 및 에셋 스트리밍을 위한 NestJS v10 + TypeScript + TypeORM 백엔드입니다.
 
-## Features
+## 기능
 
-- **Session-based JWT authentication** with 5-minute rolling tokens
-- **Heartbeat mechanism** for session persistence monitoring
-- **Range streaming** for game assets with session validation
-- **Billing integration stub** (ready for RLUSD API)
-- **Swagger API documentation** at `/docs`
-- **Rate limiting** and security headers
-- **Comprehensive e2e and unit tests**
+- **세션 기반 JWT 인증** - 5분 롤링 토큰 방식
+- **하트비트 메커니즘** - 세션 지속성 모니터링 (45초 간격)
+- **Range 스트리밍** - 세션 검증과 함께 게임 에셋 스트리밍
+- **빌링 연동 스텁** - RLUSD API 연동 준비 완료
+- **Swagger API 문서화** - `/docs` 경로에서 확인 가능
+- **속도 제한** 및 보안 헤더 적용
+- **포괄적인 e2e 및 단위 테스트**
 
-## Tech Stack
+## 기술 스택
 
 - NestJS v10
 - TypeScript v5
-- TypeORM with PostgreSQL
-- JWT session tokens
-- Helmet for security
-- Throttler for rate limiting
+- TypeORM with MySQL
+- JWT 세션 토큰
+- Helmet (보안 헤더)
+- Throttler (속도 제한)
 
-## Installation
+## 설치
 
 ```bash
 npm install
 ```
 
-## Environment Setup
+## 환경 설정
 
-Create a `.env` file (see `.env` for example):
+`.env` 파일을 생성하세요 (예시는 기존 `.env` 파일 참고):
 
 ```env
 PORT=3000
-DATABASE_URL=postgres://user:pass@localhost:5432/game_platform
-SESSION_JWT_SECRET=replace_me_with_secure_secret
+DATABASE_URL=mysql://root@localhost:3306/game_platform
+SESSION_JWT_SECRET=replace_me_with_secure_secret_in_production
 SESSION_JWT_TTL_SEC=300
 HEARTBEAT_INTERVAL_SEC=45
 ASSET_STORAGE_ROOT=./storage/assets
+NODE_ENV=development
 ```
 
-## Database Setup
+## 데이터베이스 설정
 
 ```bash
-# Run migrations
+# 마이그레이션 실행
 npm run migration:run
 
-# Seed sample data
+# 샘플 데이터 시드
 npm run seed
 ```
 
-## Running the Application
+## 애플리케이션 실행
 
 ```bash
-# Development with watch mode
+# 개발 모드 (watch 모드)
 npm run dev
 
-# Production build
+# 프로덕션 빌드
 npm run build
 npm run start:prod
+
+# PM2로 실행
+npm run start:pm2
 ```
 
-## API Documentation
+## API 문서
 
-Visit `http://localhost:3000/docs` for Swagger documentation.
+`http://localhost:3000/docs`에서 Swagger 문서를 확인하세요.
 
-## Key API Endpoints
+## 주요 API 엔드포인트
 
-### Play Session Management
+### 플레이 세션 관리
 
-- `POST /api/play/start` - Start a new play session
-- `POST /api/play/heartbeat` - Send heartbeat to maintain session
-- `POST /api/play/stop` - Stop the current session
+- `POST /api/play/start` - 새 플레이 세션 시작
+- `POST /api/play/heartbeat` - 세션 유지를 위한 하트비트 전송
+- `POST /api/play/stop` - 현재 세션 종료
 
-### Asset Streaming
+### 에셋 스트리밍
 
-- `GET /api/assets/:assetId` - Stream asset with Range support (requires session JWT)
+- `GET /api/assets/:assetId` - Range 지원 에셋 스트리밍 (세션 JWT 필요)
 
-## Testing
+## 테스트
 
 ```bash
-# Unit tests
+# 단위 테스트
 npm test
 
-# E2E tests
+# E2E 테스트
 npm run test:e2e
 
-# Test coverage
+# 테스트 커버리지
 npm run test:cov
 ```
 
-## Architecture
+## 아키텍처
 
-### Modules
+### 모듈
 
-- **auth** - JWT session strategy and guards
-- **users** - User management
-- **games** - Game metadata
-- **play** - Session lifecycle management
-- **assets** - Secure asset streaming with Range support
-- **billing** - Payment stream monitoring (stub)
+- **auth** - JWT 세션 전략 및 가드
+- **users** - 사용자 관리 (지갑 주소 기반)
+- **games** - 게임 메타데이터
+- **play** - 세션 라이프사이클 관리
+- **assets** - Range 지원 보안 에셋 스트리밍
+- **billing** - 결제 스트림 모니터링 (스텁)
 
-### Security
+### 보안
 
-- Session tokens expire in 5 minutes (configurable)
-- Heartbeat required every 45 seconds
-- Assets only accessible with valid session
-- No public static hosting - all assets proxied through API
-- Rate limiting on all endpoints
-- CORS configured for frontend domains only
+- 세션 토큰은 5분마다 만료 (설정 가능)
+- 45초마다 하트비트 필요
+- 유효한 세션으로만 에셋 접근 가능
+- 정적 호스팅 없음 - 모든 에셋은 API를 통해 프록시
+- 모든 엔드포인트에 속도 제한 적용
+- 프론트엔드 도메인에만 CORS 설정
 
-### Database Schema
+### 데이터베이스 스키마
 
-- **users** - User accounts with wallet addresses
-- **games** - Game metadata and versions
-- **play_sessions** - Active and historical sessions
-- **assets** - Game asset registry with paths and metadata
+- **users** - 지갑 주소를 가진 사용자 계정
+- **games** - 게임 메타데이터 및 버전
+- **play_sessions** - 활성 및 과거 세션
+- **assets** - 경로 및 메타데이터를 가진 게임 에셋 레지스트리
 
-## Development Notes
+## 개발 참고사항
 
-- Never trust the client - all validation server-side
-- Assets served through proxy, not direct URLs
-- Session tokens roll on each heartbeat
-- Billing checks at session start and heartbeat
-- Automatic session cleanup for expired sessions
+- **클라이언트를 절대 신뢰하지 않음** - 모든 검증은 서버 사이드
+- 에셋은 직접 URL이 아닌 프록시를 통해 제공
+- 각 하트비트마다 세션 토큰 롤링
+- 세션 시작 및 하트비트 시 빌링 확인
+- 만료된 세션 자동 정리
 
-## Production Deployment
+## 프로덕션 배포
 
-1. Set secure `SESSION_JWT_SECRET`
-2. Configure production database
-3. Enable SSL/TLS
-4. Set appropriate CORS origins
-5. Configure CDN with signed URLs (optional)
-6. Set up monitoring and logging
-7. Configure auto-scaling based on sessions
+1. 보안 `SESSION_JWT_SECRET` 설정
+2. 프로덕션 데이터베이스 구성
+3. SSL/TLS 활성화
+4. 적절한 CORS 오리진 설정
+5. 서명된 URL을 사용한 CDN 구성 (선택사항)
+6. 모니터링 및 로깅 설정
+7. 세션 기반 오토스케일링 구성
 
-## License
+## MySQL 개발 환경 설정
+
+### XAMPP 사용 (권장)
+
+1. [XAMPP](https://www.apachefriends.org/) 다운로드 및 설치
+2. XAMPP Control Panel에서 MySQL 시작
+3. phpMyAdmin에서 `game_platform` 데이터베이스 생성
+4. `.env` 파일의 `DATABASE_URL` 확인
+
+### MySQL 직접 설치
+
+```bash
+# MySQL 설치 후
+mysql -u root -p
+CREATE DATABASE game_platform;
+```
+
+## 라이선스
 
 Proprietary
