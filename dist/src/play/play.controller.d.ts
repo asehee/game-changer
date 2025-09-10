@@ -3,7 +3,7 @@ import { StartPlayDto, StartPlayResponseDto, HeartbeatResponseDto } from './dto/
 export declare class PlayController {
     private readonly playService;
     constructor(playService: PlayService);
-    start(dto: StartPlayDto, userId: string): Promise<StartPlayResponseDto>;
+    start(dto: StartPlayDto): Promise<StartPlayResponseDto>;
     heartbeat(req: any): Promise<HeartbeatResponseDto>;
     stop(req: any): Promise<void>;
 }

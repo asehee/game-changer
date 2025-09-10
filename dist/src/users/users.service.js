@@ -33,11 +33,22 @@ let UsersService = class UsersService {
         return this.userRepository.findOne({ where: { wallet } });
     }
     async create(wallet) {
+        const existingUser = await this.findByWallet(wallet);
+        if (existingUser) {
+            throw new common_1.ConflictException('User with this wallet address already exists');
+        }
         const user = this.userRepository.create({
             wallet,
             status: user_status_enum_1.UserStatus.ACTIVE,
         });
         return this.userRepository.save(user);
+    }
+    async findOrCreate(wallet) {
+        let user = await this.findByWallet(wallet);
+        if (!user) {
+            user = await this.create(wallet);
+        }
+        return user;
     }
     async isUserActive(userId) {
         const user = await this.findById(userId);

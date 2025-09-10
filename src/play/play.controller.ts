@@ -6,14 +6,12 @@ import {
   Req,
   HttpCode,
   HttpStatus,
-  Headers,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiHeader,
 } from '@nestjs/swagger';
 import { PlayService } from './play.service';
 import { SessionJwtGuard } from '../auth/session-jwt.guard';
@@ -28,28 +26,20 @@ export class PlayController {
 
   @Post('start')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Start a new play session' })
-  @ApiHeader({
-    name: 'x-user-id',
-    description: 'User ID (temporary auth)',
-    required: true,
+  @ApiOperation({ 
+    summary: 'Start a new play session',
+    description: 'Creates a new play session for the user with the specified wallet address and game.'
   })
   @ApiResponse({
     status: 200,
     description: 'Session started successfully',
     type: StartPlayResponseDto,
   })
-  @ApiResponse({ status: 400, description: 'Invalid game ID' })
+  @ApiResponse({ status: 400, description: 'Invalid wallet address format or game ID' })
   @ApiResponse({ status: 403, description: 'User blocked or billing failed' })
   @ApiResponse({ status: 404, description: 'Game not found or inactive' })
-  async start(
-    @Body() dto: StartPlayDto,
-    @Headers('x-user-id') userId: string,
-  ): Promise<StartPlayResponseDto> {
-    if (!userId) {
-      throw new Error('User ID required in x-user-id header');
-    }
-    return this.playService.startSession(userId, dto.gameId);
+  async start(@Body() dto: StartPlayDto): Promise<StartPlayResponseDto> {
+    return this.playService.startSession(dto.walletAddress, dto.gameId);
   }
 
   @Post('heartbeat')

@@ -11,12 +11,14 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const game_entity_1 = require("./game.entity");
 const games_service_1 = require("./games.service");
+const games_controller_1 = require("./games.controller");
 let GamesModule = class GamesModule {
 };
 exports.GamesModule = GamesModule;
 exports.GamesModule = GamesModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([game_entity_1.Game])],
+        controllers: [games_controller_1.GamesController],
         providers: [games_service_1.GamesService],
         exports: [games_service_1.GamesService],
     })

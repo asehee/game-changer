@@ -1,4 +1,5 @@
 export declare class StartPlayDto {
+    walletAddress: string;
     gameId: string;
 }
 export declare class StartPlayResponseDto {

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Game = void 0;
 const openapi = require("@nestjs/swagger");
 const typeorm_1 = require("typeorm");
+const swagger_1 = require("@nestjs/swagger");
 const play_session_entity_1 = require("../play/play-session.entity");
 const asset_entity_1 = require("../assets/asset.entity");
 let Game = class Game {
@@ -21,28 +22,52 @@ let Game = class Game {
 };
 exports.Game = Game;
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Game unique identifier (UUID)',
+        example: '123e4567-e89b-12d3-a456-426614174000'
+    }),
     (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
     __metadata("design:type", String)
 ], Game.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text' }),
+    (0, swagger_1.ApiProperty)({
+        description: 'Game title',
+        example: 'Test Game'
+    }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255 }),
     (0, typeorm_1.Index)('idx_games_title'),
     __metadata("design:type", String)
 ], Game.prototype, "title", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text' }),
+    (0, swagger_1.ApiProperty)({
+        description: 'Game version',
+        example: '1.0.0'
+    }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 50 }),
     __metadata("design:type", String)
 ], Game.prototype, "version", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Whether the game is active and playable',
+        example: true
+    }),
     (0, typeorm_1.Column)({ type: 'boolean', default: true }),
     (0, typeorm_1.Index)('idx_games_is_active'),
     __metadata("design:type", Boolean)
 ], Game.prototype, "isActive", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Game creation timestamp',
+        example: '2024-01-15T10:30:00.000Z'
+    }),
     (0, typeorm_1.CreateDateColumn)({ type: 'datetime' }),
     __metadata("design:type", Date)
 ], Game.prototype, "createdAt", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Game last update timestamp',
+        example: '2024-01-15T10:30:00.000Z'
+    }),
     (0, typeorm_1.UpdateDateColumn)({ type: 'datetime' }),
     __metadata("design:type", Date)
 ], Game.prototype, "updatedAt", void 0);

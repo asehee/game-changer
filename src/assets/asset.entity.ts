@@ -18,16 +18,16 @@ export class Asset {
   @Column({ type: 'uuid' })
   gameId: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 500 })
   path: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   etag: string;
 
   @Column({ type: 'bigint' })
   size: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 100 })
   mime: string;
 
   @CreateDateColumn({ type: 'datetime' })

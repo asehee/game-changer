@@ -33,8 +33,8 @@ export class PlayService {
     private readonly configService: ConfigService,
   ) {}
 
-  async startSession(userId: string, gameId: string): Promise<{ sessionToken: string; heartbeatIntervalSec: number }> {
-    const user = await this.usersService.findById(userId);
+  async startSession(walletAddress: string, gameId: string): Promise<{ sessionToken: string; heartbeatIntervalSec: number }> {
+    const user = await this.usersService.findOrCreate(walletAddress);
     if (user.status === UserStatus.BLOCKED) {
       throw new ForbiddenException('User is blocked');
     }
@@ -44,18 +44,18 @@ export class PlayService {
       throw new NotFoundException('Game not found or inactive');
     }
 
-    const billingStatus = await this.billingService.check(userId);
+    const billingStatus = await this.billingService.check(user.id);
     if (billingStatus !== BillingStatus.OK) {
       throw new ForbiddenException('Billing check failed');
     }
 
-    await this.endPreviousSessions(userId);
+    await this.endPreviousSessions(user.id);
 
     const ttlSeconds = this.configService.get<number>('SESSION_JWT_TTL_SEC', 300);
     const heartbeatInterval = this.configService.get<number>('HEARTBEAT_INTERVAL_SEC', 45);
 
     const session = this.sessionRepository.create({
-      userId,
+      userId: user.id,
       gameId,
       status: SessionStatus.ACTIVE,
       expiresAt: new Date(Date.now() + ttlSeconds * 1000),
@@ -65,16 +65,16 @@ export class PlayService {
 
     const savedSession = await this.sessionRepository.save(session);
 
-    await this.billingService.startBillingStream(savedSession.id, userId);
+    await this.billingService.startBillingStream(savedSession.id, user.id);
 
     const sessionToken = this.signSessionJwt({
       sid: savedSession.id,
-      uid: userId,
+      uid: user.id,
       gid: gameId,
       hb: heartbeatInterval,
     });
 
-    this.logger.log(`Session started: ${savedSession.id} for user ${userId} game ${gameId}`);
+    this.logger.log(`Session started: ${savedSession.id} for user ${user.id} (${walletAddress}) game ${gameId}`);
 
     return {
       sessionToken,

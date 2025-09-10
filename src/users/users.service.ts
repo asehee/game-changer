@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -24,11 +24,24 @@ export class UsersService {
   }
 
   async create(wallet: string): Promise<User> {
+    const existingUser = await this.findByWallet(wallet);
+    if (existingUser) {
+      throw new ConflictException('User with this wallet address already exists');
+    }
+    
     const user = this.userRepository.create({
       wallet,
       status: UserStatus.ACTIVE,
     });
     return this.userRepository.save(user);
+  }
+
+  async findOrCreate(wallet: string): Promise<User> {
+    let user = await this.findByWallet(wallet);
+    if (!user) {
+      user = await this.create(wallet);
+    }
+    return user;
   }
 
   async isUserActive(userId: string): Promise<boolean> {

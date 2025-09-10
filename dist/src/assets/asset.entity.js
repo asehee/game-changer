@@ -28,11 +28,11 @@ __decorate([
     __metadata("design:type", String)
 ], Asset.prototype, "gameId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text' }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 500 }),
     __metadata("design:type", String)
 ], Asset.prototype, "path", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
     __metadata("design:type", String)
 ], Asset.prototype, "etag", void 0);
 __decorate([
@@ -40,7 +40,7 @@ __decorate([
     __metadata("design:type", String)
 ], Asset.prototype, "size", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text' }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 100 }),
     __metadata("design:type", String)
 ], Asset.prototype, "mime", void 0);
 __decorate([

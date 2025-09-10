@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const openapi = require("@nestjs/swagger");
 const typeorm_1 = require("typeorm");
+const swagger_1 = require("@nestjs/swagger");
 const user_status_enum_1 = require("../common/enums/user-status.enum");
 const play_session_entity_1 = require("../play/play-session.entity");
 let User = class User {
@@ -21,15 +22,28 @@ let User = class User {
 };
 exports.User = User;
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'User unique identifier (UUID)',
+        example: '550e8400-e29b-41d4-a716-446655440000'
+    }),
     (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
     __metadata("design:type", String)
 ], User.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', unique: true }),
+    (0, swagger_1.ApiProperty)({
+        description: 'Ethereum wallet address',
+        example: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6'
+    }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, unique: true }),
     (0, typeorm_1.Index)('idx_users_wallet'),
     __metadata("design:type", String)
 ], User.prototype, "wallet", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'User status',
+        enum: user_status_enum_1.UserStatus,
+        example: user_status_enum_1.UserStatus.ACTIVE
+    }),
     (0, typeorm_1.Column)({
         type: 'enum',
         enum: user_status_enum_1.UserStatus,
@@ -38,10 +52,18 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "status", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'User creation timestamp',
+        example: '2024-01-15T10:30:00.000Z'
+    }),
     (0, typeorm_1.CreateDateColumn)({ type: 'datetime' }),
     __metadata("design:type", Date)
 ], User.prototype, "createdAt", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'User last update timestamp',
+        example: '2024-01-15T10:30:00.000Z'
+    }),
     (0, typeorm_1.UpdateDateColumn)({ type: 'datetime' }),
     __metadata("design:type", Date)
 ], User.prototype, "updatedAt", void 0);

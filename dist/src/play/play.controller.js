@@ -24,11 +24,8 @@ let PlayController = class PlayController {
     constructor(playService) {
         this.playService = playService;
     }
-    async start(dto, userId) {
-        if (!userId) {
-            throw new Error('User ID required in x-user-id header');
-        }
-        return this.playService.startSession(userId, dto.gameId);
+    async start(dto) {
+        return this.playService.startSession(dto.walletAddress, dto.gameId);
     }
     async heartbeat(req) {
         const payload = req.user;
@@ -44,25 +41,22 @@ exports.PlayController = PlayController;
 __decorate([
     (0, common_1.Post)('start'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, swagger_1.ApiOperation)({ summary: 'Start a new play session' }),
-    (0, swagger_1.ApiHeader)({
-        name: 'x-user-id',
-        description: 'User ID (temporary auth)',
-        required: true,
+    (0, swagger_1.ApiOperation)({
+        summary: 'Start a new play session',
+        description: 'Creates a new play session for the user with the specified wallet address and game.'
     }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Session started successfully',
         type: start_play_dto_1.StartPlayResponseDto,
     }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid game ID' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid wallet address format or game ID' }),
     (0, swagger_1.ApiResponse)({ status: 403, description: 'User blocked or billing failed' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Game not found or inactive' }),
     openapi.ApiResponse({ status: common_1.HttpStatus.OK, type: require("./dto/start-play.dto").StartPlayResponseDto }),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Headers)('x-user-id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [start_play_dto_1.StartPlayDto, String]),
+    __metadata("design:paramtypes", [start_play_dto_1.StartPlayDto]),
     __metadata("design:returntype", Promise)
 ], PlayController.prototype, "start", null);
 __decorate([

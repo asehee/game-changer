@@ -15,7 +15,7 @@ export declare class PlayService {
     private readonly configService;
     private readonly logger;
     constructor(sessionRepository: Repository<PlaySession>, usersService: UsersService, gamesService: GamesService, billingService: BillingService, jwtService: JwtService, configService: ConfigService);
-    startSession(userId: string, gameId: string): Promise<{
+    startSession(walletAddress: string, gameId: string): Promise<{
         sessionToken: string;
         heartbeatIntervalSec: number;
     }>;
