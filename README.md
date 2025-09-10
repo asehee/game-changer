@@ -138,3 +138,74 @@ npm run test:cov
 5. 서명된 URL을 사용한 CDN 구성 (선택사항)
 6. 모니터링 및 로깅 설정
 7. 세션 기반 오토스케일링 구성
+
+## 프론트엔드 연동 가이드
+
+### 필요한 정보
+
+프론트엔드에서 이 백엔드와 통신하려면 다음 정보가 필요합니다:
+
+1. **사용자 지갑 주소** (MetaMask 등에서 가져옴)
+2. **게임 ID** (플레이할 게임 선택 시)
+
+### 연동 플로우
+
+#### 1단계: 플레이 세션 시작
+```javascript
+// POST /api/play/start
+const response = await fetch('/api/play/start', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    walletAddress: "0x742d35Cc6635C0532925a3b8D598544e15B9a0E6",
+    gameId: "game-uuid-here"
+  })
+});
+
+const { sessionToken } = await response.json();
+// → 받은 토큰을 저장해두기
+```
+
+#### 2단계: 게임 에셋 로드
+```javascript
+// 게임 파일들 요청 (이미지, 사운드, 데이터 파일 등)
+const asset = await fetch('/api/assets/some-asset-id', {
+  headers: {
+    'Authorization': `Bearer ${sessionToken}` // 1단계에서 받은 토큰
+  }
+});
+```
+
+#### 3단계: 하트비트 (자동으로 45초마다)
+```javascript
+// 45초마다 자동 실행
+setInterval(async () => {
+  const response = await fetch('/api/play/heartbeat', {
+    method: 'POST',
+    headers: { 
+      'Authorization': `Bearer ${sessionToken}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  
+  const { newToken } = await response.json();
+  sessionToken = newToken; // 토큰 갱신
+}, 45000);
+```
+
+#### 4단계: 게임 종료
+```javascript
+// 게임 끝날 때
+await fetch('/api/play/stop', {
+  method: 'POST',
+  headers: { 'Authorization': `Bearer ${sessionToken}` }
+});
+```
+
+### 프론트엔드 요약
+
+- **지갑 주소**만 있으면 시작 가능
+- **세션 토큰**을 받아서 계속 사용
+- **45초마다 자동으로** 서버에 "살아있음" 신호 전송
+- **게임 파일들**을 토큰으로 안전하게 다운로드
+- 백엔드가 모든 보안을 처리하므로 **단순히 API 호출**만 하면 됨
