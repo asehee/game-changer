@@ -23,7 +23,7 @@ export const getDatabaseConfig = (
     database: url.pathname.slice(1),
     entities: [path.join(__dirname, '..', '**', '*.entity.{ts,js}')],
     migrations: [path.join(__dirname, '..', 'migrations', '*.{ts,js}')],
-    synchronize: configService.get('NODE_ENV') === 'development' ? true : false,
+    synchronize: true,
     logging: configService.get('NODE_ENV') === 'development',
   } as TypeOrmModuleOptions;
 };
