@@ -11,11 +11,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HeartbeatResponseDto = exports.StartPlayResponseDto = exports.StartPlayDto = void 0;
 const openapi = require("@nestjs/swagger");
-const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 class StartPlayDto {
     static _OPENAPI_METADATA_FACTORY() {
-        return { walletAddress: { required: true, type: () => String, minLength: 42, maxLength: 42, pattern: "/^0x[a-fA-F0-9]{40}$/" }, gameId: { required: true, type: () => String } };
+        return { walletAddress: { required: true, type: () => String }, gameId: { required: true, type: () => String } };
     }
 }
 exports.StartPlayDto = StartPlayDto;
@@ -24,10 +23,6 @@ __decorate([
         description: 'Ethereum wallet address',
         example: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
     }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.Length)(42, 42, { message: 'Wallet address must be 42 characters long' }),
-    (0, class_validator_1.Matches)(/^0x[a-fA-F0-9]{40}$/, { message: 'Invalid wallet address format' }),
     __metadata("design:type", String)
 ], StartPlayDto.prototype, "walletAddress", void 0);
 __decorate([
@@ -35,8 +30,6 @@ __decorate([
         description: 'The ID of the game to start playing',
         example: '123e4567-e89b-12d3-a456-426614174000',
     }),
-    (0, class_validator_1.IsUUID)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], StartPlayDto.prototype, "gameId", void 0);
 class StartPlayResponseDto {

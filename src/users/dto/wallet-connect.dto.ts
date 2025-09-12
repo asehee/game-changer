@@ -1,12 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
 
 export class WalletConnectDto {
   @ApiProperty({
-    description: 'Connected wallet address',
+    description: '연결된 지갑 주소',
     example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
   })
-  @IsString()
-  @IsNotEmpty()
   connectedAddress: string;
 }

@@ -1,12 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
 
 export class FirstChargeDto {
   @ApiProperty({
-    description: 'Temporary wallet address for first charge',
+    description: '최초 충전용 임시 지갑 주소',
     example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
   })
-  @IsString()
-  @IsNotEmpty()
   tempAddress: string;
 }

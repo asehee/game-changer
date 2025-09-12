@@ -2,13 +2,13 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class WalletResponseDto {
   @ApiProperty({
-    description: 'Indicates if the operation was successful',
+    description: '작업 성공 여부',
     example: true,
   })
   success: boolean;
 
   @ApiProperty({
-    description: 'The received wallet address',
+    description: '수신한 지갑 주소',
     example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
   })
   received: string;

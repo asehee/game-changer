@@ -1,4 +1,3 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateGameDto {
@@ -6,16 +5,12 @@ export class CreateGameDto {
     description: 'Game title',
     example: 'Test Game',
   })
-  @IsString()
-  @IsNotEmpty()
   title: string;
 
   @ApiProperty({
     description: 'Game version',
     example: '1.0.0',
   })
-  @IsString()
-  @IsNotEmpty()
   version: string;
 
   @ApiProperty({
@@ -23,7 +18,5 @@ export class CreateGameDto {
     example: true,
     default: true,
   })
-  @IsOptional()
-  @IsBoolean()
   isActive?: boolean;
 }

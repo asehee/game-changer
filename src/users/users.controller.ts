@@ -21,7 +21,7 @@ import { FirstChargeDto } from './dto/first-charge.dto';
 import { WalletResponseDto } from './dto/wallet-response.dto';
 import { User } from './user.entity';
 
-@ApiTags('Users')
+@ApiTags('사용자')
 @Controller('api/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -29,12 +29,12 @@ export class UsersController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ 
-    summary: 'Create a new user with wallet address',
-    description: 'Creates a new user with the provided wallet address. Fails if wallet already exists.'
+    summary: '지갑 주소로 새 사용자 생성',
+    description: '제공된 지갑 주소로 새 사용자를 생성합니다. 이미 존재하는 지갑이면 실패합니다.'
   })
   @ApiResponse({
     status: 201,
-    description: 'User created successfully',
+    description: '사용자 생성 성공',
     type: User,
     schema: {
       example: {
@@ -58,7 +58,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad Request: Invalid wallet address format (must be 42 chars, start with 0x)',
+    description: '잘못된 요청: 유효하지 않은 지갑 주소 형식',
     schema: {
       example: {
         statusCode: 400,
@@ -93,7 +93,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad Request: Invalid wallet address format (must be 42 chars, start with 0x)',
+    description: '잘못된 요청: 유효하지 않은 지갑 주소 형식',
     schema: {
       example: {
         statusCode: 400,
