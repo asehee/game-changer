@@ -20,14 +20,14 @@ class StartPlayDto {
 exports.StartPlayDto = StartPlayDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Ethereum wallet address',
+        description: '지갑 주소',
         example: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
     }),
     __metadata("design:type", String)
 ], StartPlayDto.prototype, "walletAddress", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'The ID of the game to start playing',
+        description: '플레이할 게임의 ID',
         example: '123e4567-e89b-12d3-a456-426614174000',
     }),
     __metadata("design:type", String)
@@ -40,14 +40,14 @@ class StartPlayResponseDto {
 exports.StartPlayResponseDto = StartPlayResponseDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'JWT token for the play session',
+        description: '플레이 세션용 JWT 토큰',
         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
     }),
     __metadata("design:type", String)
 ], StartPlayResponseDto.prototype, "sessionToken", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Heartbeat interval in seconds',
+        description: '하트비트 간격(초)',
         example: 45,
     }),
     __metadata("design:type", Number)
@@ -60,7 +60,7 @@ class HeartbeatResponseDto {
 exports.HeartbeatResponseDto = HeartbeatResponseDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'New JWT token with extended expiration',
+        description: '만료 시간이 연장된 새 JWT 토큰',
         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
     }),
     __metadata("design:type", String)

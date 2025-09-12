@@ -35,12 +35,14 @@ export class UsersController {
   @ApiResponse({
     status: 201,
     description: '사용자 생성 성공',
-    type: User,
     schema: {
       example: {
         id: '550e8400-e29b-41d4-a716-446655440000',
         wallet: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
         status: 'ACTIVE',
+        connectedWallet: null,
+        tempWallet: null,
+        isFirstChargeCompleted: false,
         createdAt: '2024-01-15T10:30:00.000Z',
         updatedAt: '2024-01-15T10:30:00.000Z'
       }
@@ -74,18 +76,20 @@ export class UsersController {
   @Post('find-or-create')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ 
-    summary: 'Find existing user or create new one (recommended)',
-    description: 'Returns existing user if wallet found, creates new user if not found. Safe to call multiple times.'
+    summary: '기존 사용자 찾기 또는 신규 생성 (권장)',
+    description: '지갑이 발견되면 기존 사용자를 반환하고, 없으면 새로 생성합니다. 여러 번 호출해도 안전합니다.'
   })
   @ApiResponse({
     status: 200,
-    description: 'User found or created successfully',
-    type: User,
+    description: '사용자 찾기 또는 생성 성공',
     schema: {
       example: {
         id: '550e8400-e29b-41d4-a716-446655440000',
         wallet: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
         status: 'ACTIVE',
+        connectedWallet: null,
+        tempWallet: null,
+        isFirstChargeCompleted: false,
         createdAt: '2024-01-15T10:30:00.000Z',
         updatedAt: '2024-01-15T10:30:00.000Z'
       }
@@ -107,21 +111,23 @@ export class UsersController {
   }
 
   @Get('wallet/:walletAddress')
-  @ApiOperation({ summary: 'Find user by wallet address' })
+  @ApiOperation({ summary: '지갑 주소로 사용자 찾기' })
   @ApiParam({
     name: 'walletAddress',
-    description: 'Ethereum wallet address (42 characters starting with 0x)',
+    description: '지갑 주소',
     example: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
   })
   @ApiResponse({
     status: 200,
-    description: 'User found',
-    type: User,
+    description: '사용자 조회 성공',
     schema: {
       example: {
         id: '550e8400-e29b-41d4-a716-446655440000',
         wallet: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
         status: 'ACTIVE',
+        connectedWallet: null,
+        tempWallet: null,
+        isFirstChargeCompleted: false,
         createdAt: '2024-01-15T10:30:00.000Z',
         updatedAt: '2024-01-15T10:30:00.000Z'
       }
@@ -129,7 +135,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 404,
-    description: 'User not found with this wallet address',
+    description: '해당 지갑 주소의 사용자를 찾을 수 없음',
     schema: {
       example: {
         statusCode: 404,
@@ -146,21 +152,23 @@ export class UsersController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Find user by ID' })
+  @ApiOperation({ summary: 'ID로 사용자 찾기' })
   @ApiParam({
     name: 'id',
-    description: 'User UUID',
+    description: '사용자 UUID',
     example: '550e8400-e29b-41d4-a716-446655440000'
   })
   @ApiResponse({
     status: 200,
-    description: 'User found',
-    type: User,
+    description: '사용자 조회 성공',
     schema: {
       example: {
         id: '550e8400-e29b-41d4-a716-446655440000',
         wallet: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
         status: 'ACTIVE',
+        connectedWallet: null,
+        tempWallet: null,
+        isFirstChargeCompleted: false,
         createdAt: '2024-01-15T10:30:00.000Z',
         updatedAt: '2024-01-15T10:30:00.000Z'
       }
@@ -168,7 +176,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 404,
-    description: 'User not found',
+    description: '사용자를 찾을 수 없음',
     schema: {
       example: {
         statusCode: 404,
@@ -183,17 +191,17 @@ export class UsersController {
   @Post('wallet-connect')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ 
-    summary: 'Connect wallet address',
-    description: 'Receives and processes a connected wallet address'
+    summary: '지갑 연결',
+    description: '연결된 지갑 주소를 수신하고 처리합니다'
   })
   @ApiResponse({
     status: 200,
-    description: 'Wallet connected successfully',
+    description: '지갑 연결 성공',
     type: WalletResponseDto,
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad Request: connectedAddress is required',
+    description: '잘못된 요청: connectedAddress가 필요합니다',
   })
   async walletConnect(@Body() walletConnectDto: WalletConnectDto): Promise<WalletResponseDto> {
     const { connectedAddress } = walletConnectDto;
@@ -211,17 +219,17 @@ export class UsersController {
   @Post('first-charge')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ 
-    summary: 'Process first charge with temporary address',
-    description: 'Receives and processes a temporary wallet address for first charge'
+    summary: '임시 주소로 첫 충전 처리',
+    description: '첫 충전을 위한 임시 지갑 주소를 수신하고 처리합니다'
   })
   @ApiResponse({
     status: 200,
-    description: 'First charge processed successfully',
+    description: '첫 충전 처리 성공',
     type: WalletResponseDto,
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad Request: tempAddress is required',
+    description: '잘못된 요청: tempAddress가 필요합니다',
   })
   async firstCharge(@Body() firstChargeDto: FirstChargeDto): Promise<WalletResponseDto> {
     const { tempAddress } = firstChargeDto;

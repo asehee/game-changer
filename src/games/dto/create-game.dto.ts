@@ -2,19 +2,19 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateGameDto {
   @ApiProperty({
-    description: 'Game title',
+    description: '게임 제목',
     example: 'Test Game',
   })
   title: string;
 
   @ApiProperty({
-    description: 'Game version',
+    description: '게임 버전',
     example: '1.0.0',
   })
   version: string;
 
   @ApiProperty({
-    description: 'Whether the game is active',
+    description: '게임 활성 상태',
     example: true,
     default: true,
   })

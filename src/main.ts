@@ -18,8 +18,8 @@ async function bootstrap() {
   
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
+      whitelist: false,
+      forbidNonWhitelisted: false,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
@@ -28,16 +28,16 @@ async function bootstrap() {
   );
   
   const config = new DocumentBuilder()
-    .setTitle('Game Platform API')
-    .setDescription('API for managing game sessions and asset streaming')
+    .setTitle('게임 플랫폼 API')
+    .setDescription('게임 세션 관리 및 자산 스트리밍을 위한 API')
     .setVersion('1.0')
     .addBearerAuth(
       {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        name: 'Session JWT',
-        description: 'Enter JWT token',
+        name: '세션 JWT',
+        description: 'JWT 토큰을 입력하세요',
         in: 'header',
       },
       'session-jwt',

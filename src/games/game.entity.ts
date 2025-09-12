@@ -14,14 +14,14 @@ import { Asset } from '../assets/asset.entity';
 @Entity('games')
 export class Game {
   @ApiProperty({
-    description: 'Game unique identifier (UUID)',
+    description: '게임 고유 식별자 (UUID)',
     example: '123e4567-e89b-12d3-a456-426614174000'
   })
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ApiProperty({
-    description: 'Game title',
+    description: '게임 제목',
     example: 'Test Game'
   })
   @Column({ type: 'varchar', length: 255 })
@@ -29,14 +29,14 @@ export class Game {
   title: string;
 
   @ApiProperty({
-    description: 'Game version',
+    description: '게임 버전',
     example: '1.0.0'
   })
   @Column({ type: 'varchar', length: 50 })
   version: string;
 
   @ApiProperty({
-    description: 'Whether the game is active and playable',
+    description: '게임이 활성 상태이고 플레이 가능한지 여부',
     example: true
   })
   @Column({ type: 'boolean', default: true })
@@ -44,14 +44,14 @@ export class Game {
   isActive: boolean;
 
   @ApiProperty({
-    description: 'Game creation timestamp',
+    description: '게임 생성 시간',
     example: '2024-01-15T10:30:00.000Z'
   })
   @CreateDateColumn({ type: 'datetime' })
   createdAt: Date;
 
   @ApiProperty({
-    description: 'Game last update timestamp',
+    description: '게임 마지막 업데이트 시간',
     example: '2024-01-15T10:30:00.000Z'
   })
   @UpdateDateColumn({ type: 'datetime' })

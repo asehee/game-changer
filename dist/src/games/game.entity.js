@@ -23,7 +23,7 @@ let Game = class Game {
 exports.Game = Game;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Game unique identifier (UUID)',
+        description: '게임 고유 식별자 (UUID)',
         example: '123e4567-e89b-12d3-a456-426614174000'
     }),
     (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
@@ -31,7 +31,7 @@ __decorate([
 ], Game.prototype, "id", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Game title',
+        description: '게임 제목',
         example: 'Test Game'
     }),
     (0, typeorm_1.Column)({ type: 'varchar', length: 255 }),
@@ -40,7 +40,7 @@ __decorate([
 ], Game.prototype, "title", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Game version',
+        description: '게임 버전',
         example: '1.0.0'
     }),
     (0, typeorm_1.Column)({ type: 'varchar', length: 50 }),
@@ -48,7 +48,7 @@ __decorate([
 ], Game.prototype, "version", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Whether the game is active and playable',
+        description: '게임이 활성 상태이고 플레이 가능한지 여부',
         example: true
     }),
     (0, typeorm_1.Column)({ type: 'boolean', default: true }),
@@ -57,7 +57,7 @@ __decorate([
 ], Game.prototype, "isActive", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Game creation timestamp',
+        description: '게임 생성 시간',
         example: '2024-01-15T10:30:00.000Z'
     }),
     (0, typeorm_1.CreateDateColumn)({ type: 'datetime' }),
@@ -65,7 +65,7 @@ __decorate([
 ], Game.prototype, "createdAt", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Game last update timestamp',
+        description: '게임 마지막 업데이트 시간',
         example: '2024-01-15T10:30:00.000Z'
     }),
     (0, typeorm_1.UpdateDateColumn)({ type: 'datetime' }),

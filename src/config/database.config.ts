@@ -22,8 +22,8 @@ export const getDatabaseConfig = (
     password: url.password,
     database: url.pathname.slice(1),
     entities: [path.join(__dirname, '..', '**', '*.entity.{ts,js}')],
-    migrations: [path.join(__dirname, '..', '..', 'migrations', '*.{ts,js}')],
-    synchronize: false,
+    migrations: [path.join(__dirname, '..', 'migrations', '*.{ts,js}')],
+    synchronize: configService.get('NODE_ENV') === 'development' ? true : false,
     logging: configService.get('NODE_ENV') === 'development',
   } as TypeOrmModuleOptions;
 };
@@ -32,8 +32,8 @@ export const dataSourceOptions: DataSourceOptions = {
   type: 'mysql',
   url: process.env.DATABASE_URL || 'mysql://root@localhost:3306/game_platform',
   entities: [path.join(__dirname, '..', '**', '*.entity.{ts,js}')],
-  migrations: [path.join(__dirname, '..', '..', 'migrations', '*.{ts,js}')],
-  synchronize: false,
+  migrations: [path.join(__dirname, '..', 'migrations', '*.{ts,js}')],
+  synchronize: process.env.NODE_ENV === 'development' ? true : false,
   logging: process.env.NODE_ENV === 'development',
 };
 

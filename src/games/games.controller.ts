@@ -16,7 +16,7 @@ import { GamesService } from './games.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { Game } from './game.entity';
 
-@ApiTags('Games')
+@ApiTags('게임')
 @Controller('api/games')
 export class GamesController {
   constructor(private readonly gamesService: GamesService) {}
@@ -24,17 +24,16 @@ export class GamesController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ 
-    summary: 'Create a new game',
-    description: 'Creates a new game that can be used for play sessions.'
+    summary: '새 게임 생성',
+    description: '플레이 세션에 사용할 수 있는 새 게임을 생성합니다.'
   })
   @ApiResponse({
     status: 201,
-    description: 'Game created successfully',
-    type: Game,
+    description: '게임 생성 성공',
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad Request: Invalid game data',
+    description: '잘못된 요청: 유효하지 않은 게임 데이터',
   })
   async createGame(@Body() createGameDto: CreateGameDto): Promise<Game> {
     return this.gamesService.create({
@@ -45,26 +44,24 @@ export class GamesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all active games' })
+  @ApiOperation({ summary: '모든 활성 게임 조회' })
   @ApiResponse({
     status: 200,
-    description: 'List of active games',
-    type: [Game],
+    description: '활성 게임 목록',
   })
   async getAllGames(): Promise<Game[]> {
     return this.gamesService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get game by ID' })
+  @ApiOperation({ summary: 'ID로 게임 조회' })
   @ApiResponse({
     status: 200,
-    description: 'Game found',
-    type: Game,
+    description: '게임 조회 성공',
   })
   @ApiResponse({
     status: 404,
-    description: 'Game not found',
+    description: '게임을 찾을 수 없음',
   })
   async getGame(@Param('id') id: string): Promise<Game> {
     return this.gamesService.findById(id);

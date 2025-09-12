@@ -25,7 +25,7 @@ import { SessionJwtGuard } from '../auth/session-jwt.guard';
 import { SessionJwtPayload } from '../auth/session-jwt.strategy';
 import { Throttle } from '@nestjs/throttler';
 
-@ApiTags('assets')
+@ApiTags('자산')
 @Controller('api/assets')
 @UseGuards(SessionJwtGuard)
 @ApiBearerAuth('session-jwt')
@@ -39,54 +39,54 @@ export class AssetsController {
 
   @Get(':assetId')
   @Throttle({ default: { limit: 100, ttl: 60000 } })
-  @ApiOperation({ summary: 'Stream asset with Range support' })
+  @ApiOperation({ summary: 'Range 지원 자산 스트리밍' })
   @ApiParam({
     name: 'assetId',
-    description: 'Asset ID',
+    description: '자산 ID',
     type: 'string',
   })
   @ApiHeader({
     name: 'Range',
-    description: 'HTTP Range header for partial content',
+    description: '부분 콘텐츠를 위한 HTTP Range 헤더',
     required: false,
   })
   @ApiResponse({
     status: 200,
-    description: 'Full content',
+    description: '전체 콘텐츠',
     headers: {
       'Content-Type': {
-        description: 'MIME type of the asset',
+        description: '자산의 MIME 타입',
       },
       'Content-Length': {
-        description: 'Size of the content',
+        description: '콘텐츠 크기',
       },
       'Accept-Ranges': {
-        description: 'bytes',
+        description: '바이트',
       },
       'Cache-Control': {
-        description: 'Cache policy',
+        description: '캐시 정책',
       },
       'ETag': {
-        description: 'Entity tag for caching',
+        description: '캐시용 엔티티 태그',
       },
     },
   })
   @ApiResponse({
     status: 206,
-    description: 'Partial content',
+    description: '부분 콘텐츠',
     headers: {
       'Content-Range': {
-        description: 'Byte range being returned',
+        description: '반환되는 바이트 범위',
       },
       'Content-Length': {
-        description: 'Size of the partial content',
+        description: '부분 콘텐츠의 크기',
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - invalid session' })
-  @ApiResponse({ status: 403, description: 'Forbidden - billing failed' })
-  @ApiResponse({ status: 404, description: 'Asset not found' })
-  @ApiResponse({ status: 416, description: 'Range Not Satisfiable' })
+  @ApiResponse({ status: 401, description: '미인증 - 유효하지 않은 세션' })
+  @ApiResponse({ status: 403, description: '금지됨 - 요금 결제 실패' })
+  @ApiResponse({ status: 404, description: '자산을 찾을 수 없음' })
+  @ApiResponse({ status: 416, description: '범위를 만족할 수 없음' })
   async streamAsset(
     @Param('assetId') assetId: string,
     @Headers('range') rangeHeader: string | undefined,
