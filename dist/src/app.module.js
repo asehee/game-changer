@@ -19,6 +19,7 @@ const games_module_1 = require("./games/games.module");
 const play_module_1 = require("./play/play.module");
 const assets_module_1 = require("./assets/assets.module");
 const billing_module_1 = require("./billing/billing.module");
+const chain_module_1 = require("./chain/chain.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -45,6 +46,7 @@ exports.AppModule = AppModule = __decorate([
             play_module_1.PlayModule,
             assets_module_1.AssetsModule,
             billing_module_1.BillingModule,
+            chain_module_1.ChainModule,
         ],
     })
 ], AppModule);

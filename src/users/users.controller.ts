@@ -16,6 +16,9 @@ import {
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { WalletConnectDto } from './dto/wallet-connect.dto';
+import { FirstChargeDto } from './dto/first-charge.dto';
+import { WalletResponseDto } from './dto/wallet-response.dto';
 import { User } from './user.entity';
 
 @ApiTags('Users')
@@ -175,5 +178,70 @@ export class UsersController {
   })
   async findById(@Param('id') id: string): Promise<User> {
     return this.usersService.findById(id);
+  }
+
+  @Post('wallet-connect')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ 
+    summary: 'Connect wallet address',
+    description: 'Receives and processes a connected wallet address'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Wallet connected successfully',
+    type: WalletResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request: connectedAddress is required',
+  })
+  async walletConnect(@Body() walletConnectDto: WalletConnectDto): Promise<WalletResponseDto> {
+    const { connectedAddress } = walletConnectDto;
+    
+    console.log('📩 Received wallet address:', connectedAddress);
+    
+    const user = await this.usersService.findOrCreateByConnectedWallet(connectedAddress);
+    
+    return {
+      success: true,
+      received: connectedAddress,
+    };
+  }
+
+  @Post('first-charge')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ 
+    summary: 'Process first charge with temporary address',
+    description: 'Receives and processes a temporary wallet address for first charge'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'First charge processed successfully',
+    type: WalletResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request: tempAddress is required',
+  })
+  async firstCharge(@Body() firstChargeDto: FirstChargeDto): Promise<WalletResponseDto> {
+    const { tempAddress } = firstChargeDto;
+    
+    console.log('📩 Received temp wallet address:', tempAddress);
+    
+    const existingUser = await this.usersService.findByTempWallet(tempAddress);
+    if (existingUser) {
+      return {
+        success: true,
+        received: tempAddress,
+      };
+    }
+    
+    const user = await this.usersService.create(tempAddress);
+    await this.usersService.setTempWallet(user.id, tempAddress);
+    
+    return {
+      success: true,
+      received: tempAddress,
+    };
   }
 }

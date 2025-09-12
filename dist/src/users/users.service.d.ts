@@ -10,4 +10,10 @@ export declare class UsersService {
     isUserActive(userId: string): Promise<boolean>;
     blockUser(userId: string): Promise<User>;
     unblockUser(userId: string): Promise<User>;
+    updateConnectedWallet(userId: string, connectedWallet: string): Promise<User>;
+    findByConnectedWallet(connectedWallet: string): Promise<User | null>;
+    setTempWallet(userId: string, tempWallet: string): Promise<User>;
+    completeFirstCharge(userId: string): Promise<User>;
+    findByTempWallet(tempWallet: string): Promise<User | null>;
+    findOrCreateByConnectedWallet(connectedWallet: string): Promise<User>;
 }

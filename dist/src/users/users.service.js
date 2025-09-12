@@ -64,6 +64,42 @@ let UsersService = class UsersService {
         user.status = user_status_enum_1.UserStatus.ACTIVE;
         return this.userRepository.save(user);
     }
+    async updateConnectedWallet(userId, connectedWallet) {
+        const user = await this.findById(userId);
+        user.connectedWallet = connectedWallet;
+        return this.userRepository.save(user);
+    }
+    async findByConnectedWallet(connectedWallet) {
+        return this.userRepository.findOne({ where: { connectedWallet } });
+    }
+    async setTempWallet(userId, tempWallet) {
+        const user = await this.findById(userId);
+        if (user.isFirstChargeCompleted) {
+            throw new common_1.ConflictException('First charge has already been completed for this user');
+        }
+        user.tempWallet = tempWallet;
+        return this.userRepository.save(user);
+    }
+    async completeFirstCharge(userId) {
+        const user = await this.findById(userId);
+        user.isFirstChargeCompleted = true;
+        return this.userRepository.save(user);
+    }
+    async findByTempWallet(tempWallet) {
+        return this.userRepository.findOne({ where: { tempWallet } });
+    }
+    async findOrCreateByConnectedWallet(connectedWallet) {
+        let user = await this.findByConnectedWallet(connectedWallet);
+        if (!user) {
+            user = this.userRepository.create({
+                wallet: connectedWallet,
+                connectedWallet,
+                status: user_status_enum_1.UserStatus.ACTIVE,
+            });
+            user = await this.userRepository.save(user);
+        }
+        return user;
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

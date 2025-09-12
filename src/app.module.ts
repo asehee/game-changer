@@ -10,6 +10,7 @@ import { GamesModule } from './games/games.module';
 import { PlayModule } from './play/play.module';
 import { AssetsModule } from './assets/assets.module';
 import { BillingModule } from './billing/billing.module';
+import { ChainModule } from './chain/chain.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { BillingModule } from './billing/billing.module';
     PlayModule,
     AssetsModule,
     BillingModule,
+    ChainModule,
   ],
 })
 export class AppModule {}

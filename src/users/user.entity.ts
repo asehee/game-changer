@@ -41,6 +41,31 @@ export class User {
   status: UserStatus;
 
   @ApiProperty({
+    description: 'Connected wallet address from wallet connect',
+    example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
+    required: false
+  })
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Index('idx_users_connected_wallet')
+  connectedWallet: string;
+
+  @ApiProperty({
+    description: 'Temporary wallet address for first charge (used once)',
+    example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
+    required: false
+  })
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Index('idx_users_temp_wallet')
+  tempWallet: string;
+
+  @ApiProperty({
+    description: 'Whether first charge has been completed',
+    example: false
+  })
+  @Column({ type: 'boolean', default: false })
+  isFirstChargeCompleted: boolean;
+
+  @ApiProperty({
     description: 'User creation timestamp',
     example: '2024-01-15T10:30:00.000Z'
   })

@@ -4,6 +4,9 @@ export declare class User {
     id: string;
     wallet: string;
     status: UserStatus;
+    connectedWallet: string;
+    tempWallet: string;
+    isFirstChargeCompleted: boolean;
     createdAt: Date;
     updatedAt: Date;
     playSessions: PlaySession[];

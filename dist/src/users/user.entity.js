@@ -17,7 +17,7 @@ const user_status_enum_1 = require("../common/enums/user-status.enum");
 const play_session_entity_1 = require("../play/play-session.entity");
 let User = class User {
     static _OPENAPI_METADATA_FACTORY() {
-        return { id: { required: true, type: () => String }, wallet: { required: true, type: () => String }, status: { required: true, enum: require("../common/enums/user-status.enum").UserStatus }, createdAt: { required: true, type: () => Date }, updatedAt: { required: true, type: () => Date }, playSessions: { required: true, type: () => [require("../play/play-session.entity").PlaySession] } };
+        return { id: { required: true, type: () => String }, wallet: { required: true, type: () => String }, status: { required: true, enum: require("../common/enums/user-status.enum").UserStatus }, connectedWallet: { required: true, type: () => String }, tempWallet: { required: true, type: () => String }, isFirstChargeCompleted: { required: true, type: () => Boolean }, createdAt: { required: true, type: () => Date }, updatedAt: { required: true, type: () => Date }, playSessions: { required: true, type: () => [require("../play/play-session.entity").PlaySession] } };
     }
 };
 exports.User = User;
@@ -51,6 +51,34 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], User.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Connected wallet address from wallet connect',
+        example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
+        required: false
+    }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
+    (0, typeorm_1.Index)('idx_users_connected_wallet'),
+    __metadata("design:type", String)
+], User.prototype, "connectedWallet", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Temporary wallet address for first charge (used once)',
+        example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
+        required: false
+    }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
+    (0, typeorm_1.Index)('idx_users_temp_wallet'),
+    __metadata("design:type", String)
+], User.prototype, "tempWallet", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Whether first charge has been completed',
+        example: false
+    }),
+    (0, typeorm_1.Column)({ type: 'boolean', default: false }),
+    __metadata("design:type", Boolean)
+], User.prototype, "isFirstChargeCompleted", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'User creation timestamp',
