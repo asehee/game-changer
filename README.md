@@ -33,6 +33,10 @@ npm install
 
 ```env
 PORT=3000
+SERVER_SEED=sEXXXXXXXXXXXXXXXXXXXX
+ISSUER_ADDRESS=rJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a
+TOKEN_CURRENCY_CODE=USD
+TESTNET=wss://s.altnet.rippletest.net:51233
 DATABASE_URL=mysql://root@localhost:3306/game_platform
 SESSION_JWT_SECRET=replace_me_with_secure_secret_in_production
 SESSION_JWT_TTL_SEC=300
