@@ -39,7 +39,7 @@ export class GamesController {
     return this.gamesService.create({
       title: createGameDto.title,
       version: createGameDto.version,
-      isActive: createGameDto.isActive ?? true,
+      isActive: true,
       developerAddress: createGameDto.developerAddress, // 추가
       ratePerSession: createGameDto.ratePerSession, // 추가된 부분
     });
