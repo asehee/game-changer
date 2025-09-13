@@ -63,12 +63,12 @@ export class UsersService {
 
   async updateConnectedWallet(userId: string, connectedWallet: string): Promise<User> {
     const user = await this.findById(userId);
-    user.connectedWallet = connectedWallet;
+    user.wallet = connectedWallet;
     return this.userRepository.save(user);
   }
 
-  async findByConnectedWallet(connectedWallet: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { connectedWallet } });
+  async findByConnectedWallet(wallet: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { wallet } });
   }
 
   async setTempWallet(userId: string, tempWallet: string): Promise<User> {
@@ -95,7 +95,6 @@ export class UsersService {
     if (!user) {
       user = this.userRepository.create({
         wallet: connectedWallet,
-        connectedWallet,
         status: UserStatus.ACTIVE,
       });
       user = await this.userRepository.save(user);

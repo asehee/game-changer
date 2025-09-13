@@ -19,4 +19,10 @@ export class CreateGameDto {
     default: true,
   })
   isActive?: boolean;
+
+  @ApiProperty({ 
+    description: '게임 개발자 지갑 주소', 
+    example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH'
+  })
+  developerAddress: string;
 }

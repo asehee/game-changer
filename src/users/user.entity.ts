@@ -22,9 +22,9 @@ export class User {
 
   @ApiProperty({
     description: '지갑 주소',
-    example: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6'
+    example: 'rKGPzJNr5HgP3HPpkkm4ofE1yTv6K2eLoV'
   })
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ type: 'varchar', length: 255, unique: true, nullable: false })
   @Index('idx_users_wallet')
   wallet: string;
 
@@ -39,15 +39,6 @@ export class User {
     default: UserStatus.ACTIVE,
   })
   status: UserStatus;
-
-  @ApiProperty({
-    description: '지갑 연결에서 받은 연결된 지갑 주소',
-    example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
-    required: false
-  })
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  @Index('idx_users_connected_wallet')
-  connectedWallet: string;
 
   @ApiProperty({
     description: '첫 충전용 임시 지갑 주소 (일회성)',

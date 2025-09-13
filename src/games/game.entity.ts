@@ -44,6 +44,13 @@ export class Game {
   isActive: boolean;
 
   @ApiProperty({
+    description: '게임 개발자 지갑 주소',
+    example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH'
+  })
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  developerAddress: string;
+
+  @ApiProperty({
     description: '게임 생성 시간',
     example: '2024-01-15T10:30:00.000Z'
   })

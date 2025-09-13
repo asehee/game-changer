@@ -40,6 +40,7 @@ export class GamesController {
       title: createGameDto.title,
       version: createGameDto.version,
       isActive: createGameDto.isActive ?? true,
+      developerAddress: createGameDto.developerAddress, // 추가
     });
   }
 
