@@ -25,4 +25,10 @@ export class CreateGameDto {
     example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH'
   })
   developerAddress: string;
+
+  @ApiProperty({
+    description: '플레이 시간당 개발자에게 지급될 토큰(LUSD)의 양',
+    example: 360.5,
+  })
+  ratePerSession: number;
 }

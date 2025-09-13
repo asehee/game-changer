@@ -64,6 +64,14 @@ export class Game {
   @UpdateDateColumn({ type: 'datetime' })
   updatedAt: Date;
 
+  // 시간당 수익률 컬럼 추가
+  @ApiProperty({
+    description: '플레이 시간당 개발자에게 지급될 토큰(LUSD)의 양',
+    example: '360' // 예: 시간당 360 LUSD
+  })
+  @Column({ type: 'decimal', precision: 18, scale: 6, default: 0.0 })
+  ratePerSession: number;
+
   @OneToMany(() => PlaySession, (session) => session.game)
   playSessions: PlaySession[];
 

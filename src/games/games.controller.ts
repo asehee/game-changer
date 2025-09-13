@@ -41,6 +41,7 @@ export class GamesController {
       version: createGameDto.version,
       isActive: createGameDto.isActive ?? true,
       developerAddress: createGameDto.developerAddress, // 추가
+      ratePerSession: createGameDto.ratePerSession, // 추가된 부분
     });
   }
 
