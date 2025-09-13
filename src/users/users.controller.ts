@@ -220,7 +220,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ 
     summary: '임시 주소로 첫 충전 처리',
-    description: '첫 충전을 위한 임시 지갑 주소를 수신하고 처리합니다'
+    description: '첫 충전을 위한 임시 지갑 주소와 연결된 지갑 주소를 처리합니다'
   })
   @ApiResponse({
     status: 200,
@@ -229,24 +229,27 @@ export class UsersController {
   })
   @ApiResponse({
     status: 400,
-    description: '잘못된 요청: tempAddress가 필요합니다',
+    description: '잘못된 요청: tempAddress 및 connectedWallet이 필요합니다',
   })
   async firstCharge(@Body() firstChargeDto: FirstChargeDto): Promise<WalletResponseDto> {
-    const { tempAddress } = firstChargeDto;
-    
-    console.log('📩 Received temp wallet address:', tempAddress);
-    
-    const existingUser = await this.usersService.findByTempWallet(tempAddress);
-    if (existingUser) {
-      return {
-        success: true,
-        received: tempAddress,
-      };
+    const { tempAddress, connectedWallet } = firstChargeDto;
+  
+    if (!tempAddress || !connectedWallet) {
+      return { success: false, received: null };
     }
-    
-    const user = await this.usersService.create(tempAddress);
-    await this.usersService.setTempWallet(user.id, tempAddress);
-    
+  
+    // wallet으로 기존 유저 조회
+    let user = await this.usersService.findByWallet(connectedWallet);
+  
+    if (user) {
+      // 기존 유저라면 tempWallet 업데이트
+      await this.usersService.setTempWallet(user.id, tempAddress);
+    } else {
+      // 없으면 새 유저 생성
+      user = await this.usersService.create(connectedWallet);
+      await this.usersService.setTempWallet(user.id, tempAddress);
+    }
+  
     return {
       success: true,
       received: tempAddress,
