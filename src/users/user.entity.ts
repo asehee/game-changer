@@ -70,6 +70,14 @@ export class User {
   @UpdateDateColumn({ type: 'datetime' })
   updatedAt: Date;
 
+  @ApiProperty({
+    description: '이 사용자가 개발자로 활성화되었는지 여부 (플랫폼 토큰 TrustSet 필요)',
+    example: false,
+    default: false,
+  })
+  @Column({ type: 'boolean', default: false })
+  isDeveloper: boolean;
+  
   @OneToMany(() => PlaySession, (session) => session.user)
   playSessions: PlaySession[];
 }

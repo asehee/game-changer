@@ -20,6 +20,8 @@ import { WalletConnectDto } from './dto/wallet-connect.dto';
 import { FirstChargeDto } from './dto/first-charge.dto';
 import { WalletResponseDto } from './dto/wallet-response.dto';
 import { BalanceRequestDto, BalanceResponseDto  } from './dto/check-balance.dto';
+import { ActivateDeveloperRequestDto, ActivateDeveloperResponseDto } from './dto/activate-developer.dto';
+import { SubmitTrustlineRequestDto, SubmitTrustlineResponseDto } from './dto/submit-trustline.dto';
 import { User } from './user.entity';
 
 @ApiTags('사용자')
@@ -270,4 +272,28 @@ export class UsersController {
     return this.usersService.checkTempWalletBalance(balanceRequestDto.walletAddress);
   }
 
+  @Post('developer/activate')
+  @ApiOperation({ summary: "현재 사용자를 개발자로 활성화" })
+  @ApiResponse({ status: 200, type: ActivateDeveloperResponseDto })
+  async activateDeveloperStatus( 
+    @Body() ActivateDeveloperRequestDto: ActivateDeveloperRequestDto,
+    ): Promise<ActivateDeveloperResponseDto> {
+    return this.usersService.activateDeveloper(ActivateDeveloperRequestDto.walletAddress);
+  }
+
+  @Post('developer/submit-trustline')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '서명된 TrustSet 트랜잭션을 제출하여 개발자를 최종 활성화 (인증 없음)' })
+  @ApiResponse({ status: 200, description: '개발자 활성화 성공', type: SubmitTrustlineResponseDto })
+  @ApiResponse({ status: 400, description: '트랜잭션 제출 실패 또는 잘못된 서명' })
+  async submitTrustline(
+    @Body() submitDto: SubmitTrustlineRequestDto,
+  ): Promise<SubmitTrustlineResponseDto> {
+    
+    // 🔥 3. DTO에서 필요한 값들을 추출하여 서비스로 전달합니다.
+    return this.usersService.submitTrustlineAndActivate(
+      submitDto.walletAddress, 
+      submitDto.signedTransaction
+    );
+  }
 }
