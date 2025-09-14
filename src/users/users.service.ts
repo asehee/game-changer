@@ -292,15 +292,15 @@ export class UsersService {
 
       // 4. 최종 결과 확인
       const meta = result.result.meta;
-    if (typeof meta === 'object' && meta !== null && 'TransactionResult' in meta) {
-      if (meta.TransactionResult !== "tesSUCCESS") {
-        this.logger.error('Payment transaction failed', result);
-        throw new InternalServerErrorException(`Payment failed: ${meta.TransactionResult}`);
+      if (typeof meta === 'object' && meta !== null && 'TransactionResult' in meta) {
+        if (meta.TransactionResult !== "tesSUCCESS") {
+          this.logger.error('Payment transaction failed', result);
+          throw new InternalServerErrorException(`Payment failed: ${meta.TransactionResult}`);
+        }
+      } else {
+        this.logger.error('Payment transaction failed with unexpected metadata format', result);
+        throw new InternalServerErrorException('Payment failed due to an unexpected response format.');
       }
-    } else {
-      this.logger.error('Payment transaction failed with unexpected metadata format', result);
-      throw new InternalServerErrorException('Payment failed due to an unexpected response format.');
-    }
 
       this.logger.log(`Successfully sent ${rewardAmountXRP} XRP to ${userAddress}. Tx Hash: ${result.result.hash}`);
       
