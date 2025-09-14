@@ -22,11 +22,109 @@ export class Game {
 
   @ApiProperty({
     description: '게임 제목',
-    example: 'Test Game'
+    example: 'Cyber Warriors'
   })
   @Column({ type: 'varchar', length: 255 })
   @Index('idx_games_title')
   title: string;
+
+  @ApiProperty({
+    description: '게임 설명',
+    example: 'Epic cyberpunk battle royale with stunning graphics'
+  })
+  @Column({ type: 'text', nullable: true, default: null })
+  description: string;
+
+  @ApiProperty({
+    description: '게임 장르',
+    example: 'action',
+    enum: ['action', 'adventure', 'strategy', 'simulation', 'rpg', 'puzzle', 'sports', 'racing', 'horror', 'casual']
+  })
+  @Column({ type: 'varchar', length: 50, default: 'casual' })
+  @Index('idx_games_genre')
+  genre: string;
+
+  @ApiProperty({
+    description: '게임 썸네일 이미지 URL',
+    example: '/assets/game_images/shooting1.png'
+  })
+  @Column({ type: 'varchar', length: 500, nullable: true, default: null })
+  thumbnail: string;
+
+  @ApiProperty({
+    description: '게임 실행 URL',
+    example: 'http://localhost:9999'
+  })
+  @Column({ type: 'varchar', length: 500, nullable: true, default: null })
+  gameUrl: string;
+
+  @ApiProperty({
+    description: '외부 게임 여부 (iframe으로 로드)',
+    example: true
+  })
+  @Column({ type: 'boolean', default: true })
+  isExternal: boolean;
+
+  @ApiProperty({
+    description: '총 플레이어 수',
+    example: 15234
+  })
+  @Column({ type: 'int', default: 0 })
+  playerCount: number;
+
+  @ApiProperty({
+    description: '총 플레이 시간 (시간 단위)',
+    example: 125000
+  })
+  @Column({ type: 'bigint', default: 0 })
+  totalPlayTime: number;
+
+  @ApiProperty({
+    description: '게임 평점 (0-5)',
+    example: 4.8
+  })
+  @Column({ type: 'decimal', precision: 2, scale: 1, default: 0.0 })
+  rating: number;
+
+  @ApiProperty({
+    description: '시간당 가격 (USD)',
+    example: 0.5
+  })
+  @Column({ type: 'decimal', precision: 10, scale: 4, default: 0.0 })
+  price: number;
+
+  @ApiProperty({
+    description: '초당 가격 (USD)',
+    example: 0.00000001
+  })
+  @Column({ type: 'decimal', precision: 10, scale: 8, default: 0.00000001 })
+  pricePerSecond: number;
+
+  @ApiProperty({
+    description: '총 세션 수',
+    example: 1520
+  })
+  @Column({ type: 'int', default: 0 })
+  totalSessions: number;
+
+  @ApiProperty({
+    description: '게임 승인 상태',
+    example: 'APPROVED'
+  })
+  @Column({
+    type: 'enum',
+    enum: ['PENDING', 'APPROVED', 'REJECTED'],
+    default: 'PENDING'
+  })
+  @Index('idx_games_approval')
+  approvalStatus: string;
+
+  @ApiProperty({
+    description: '할인율 (%)',
+    example: 20
+  })
+  @Column({ type: 'int', default: 0 })
+  discount: number;
 
   @ApiProperty({
     description: '게임 버전',
@@ -44,11 +142,12 @@ export class Game {
   isActive: boolean;
 
   @ApiProperty({
-    description: '게임 개발자 지갑 주소',
-    example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH'
+    description: '게임 개발자 ID',
+    example: '550e8400-e29b-41d4-a716-446655440000'
   })
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  developerAddress: string;
+  @Column({ type: 'varchar', length: 36 })
+  @Index('idx_games_developer')
+  developerId: string;
 
   @ApiProperty({
     description: '게임 생성 시간',

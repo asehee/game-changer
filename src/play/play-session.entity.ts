@@ -26,6 +26,10 @@ export class PlaySession {
   @Column({ type: 'uuid' })
   gameId: string;
 
+  @Column({ type: 'uuid' })
+  @Index('idx_play_sessions_developer')
+  developerId: string;
+
   @Column({
     type: 'enum',
     enum: SessionStatus,
@@ -42,6 +46,24 @@ export class PlaySession {
 
   @Column({ type: 'int', default: 0 })
   tokenRenewalCount: number;
+
+  @Column({ type: 'datetime', nullable: true })
+  startedAt: Date;
+
+  @Column({ type: 'datetime', nullable: true })
+  endedAt: Date;
+
+  @Column({ type: 'int', default: 0 })
+  activePlayTime: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 8, nullable: true })
+  costPerSecond: number;
+
+  @Column({ type: 'decimal', precision: 18, scale: 6, default: 0 })
+  totalCost: number;
+
+  @Column({ type: 'int', default: 0 })
+  heartbeatCount: number;
 
   @Column({
     type: 'enum',

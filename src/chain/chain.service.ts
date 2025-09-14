@@ -7,16 +7,13 @@ export class ChainService {
   constructor(private readonly configService: ConfigService) {}
 
   getTokenMetadata(): TokenMetadataResponseDto {
-    const serverSeed = this.configService.get<string>('SERVER_SEED');
     let serverAddress = '';
     
-    if (serverSeed) {
-      try {
-        const xrpl = require('xrpl');
-        serverAddress = xrpl.Wallet.fromSeed(serverSeed).address;
-      } catch (error) {
-        console.error('Error getting server address:', error);
-      }
+    try {
+      const xrpl = require('xrpl');
+      serverAddress = xrpl.Wallet.generate().address;
+    } catch (error) {
+      console.error('Error generating server address:', error);
     }
 
     return {

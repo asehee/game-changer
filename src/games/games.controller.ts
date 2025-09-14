@@ -38,10 +38,17 @@ export class GamesController {
   async createGame(@Body() createGameDto: CreateGameDto): Promise<Game> {
     return this.gamesService.create({
       title: createGameDto.title,
+      description: createGameDto.description,
+      genre: createGameDto.genre,
+      thumbnail: createGameDto.thumbnail,
+      playerCount: createGameDto.playerCount || 0,
+      totalPlayTime: createGameDto.totalPlayTime || 0,
+      rating: createGameDto.rating || 0.0,
+      price: createGameDto.price || 0.0,
+      discount: createGameDto.discount || 0,
       version: createGameDto.version,
       isActive: true,
-      developerAddress: createGameDto.developerAddress, // 추가
-      ratePerSession: createGameDto.ratePerSession, // 추가된 부분
+      ratePerSession: createGameDto.ratePerSession,
     });
   }
 
@@ -50,9 +57,21 @@ export class GamesController {
   @ApiResponse({
     status: 200,
     description: '활성 게임 목록',
+    type: [Game],
   })
   async getAllGames(): Promise<Game[]> {
     return this.gamesService.findAll();
+  }
+
+  @Get('genre/:genre')
+  @ApiOperation({ summary: '장르별 게임 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '장르별 게임 목록',
+    type: [Game],
+  })
+  async getGamesByGenre(@Param('genre') genre: string): Promise<Game[]> {
+    return this.gamesService.findByGenre(genre);
   }
 
   @Get(':id')

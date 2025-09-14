@@ -29,7 +29,17 @@ export class GamesService {
   }
 
   async findAll(): Promise<Game[]> {
-    return this.gameRepository.find({ where: { isActive: true } });
+    return this.gameRepository.find({ 
+      where: { isActive: true },
+      order: { createdAt: 'DESC' }
+    });
+  }
+
+  async findByGenre(genre: string): Promise<Game[]> {
+    return this.gameRepository.find({
+      where: { genre, isActive: true },
+      order: { rating: 'DESC', playerCount: 'DESC' }
+    });
   }
 
   async create(data: Partial<Game>): Promise<Game> {
