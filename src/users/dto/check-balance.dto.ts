@@ -20,8 +20,14 @@ export class BalanceRequestDto {
 }
 
 export class BalanceResponseDto {
-  @ApiProperty({ description: '조회된 임시 지갑 주소', example: 'rw19puaVfXPeEBgAMFyV37UvhDQNG5XWyN' })
-  tempWalletAddress: string;
+  @ApiProperty({ description: '사용자 존재 여부', example: true })
+  hasUser: boolean;
+
+  @ApiProperty({ description: '임시 지갑 생성 여부', example: true })
+  hasTempWallet: boolean;
+
+  @ApiProperty({ description: '조회된 임시 지갑 주소', example: 'rw19puaVfXPeEBgAMFyV37UvhDQNG5XWyN', nullable: true })
+  tempWalletAddress: string | null;
 
   @ApiProperty({ description: 'XRP 잔액', example: '1.201' })
   xrpBalance: string;

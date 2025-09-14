@@ -122,36 +122,72 @@ export class UsersService {
 
   async checkTempWalletBalance(connectedWallet: string): Promise<BalanceResponseDto> {
     let user = await this.findByConnectedWallet(connectedWallet);
+    
+    // 사용자가 존재하지 않는 경우
     if (!user) {
-      throw new NotFoundException(`User with address ${connectedWallet} not found`);
+      return {
+        hasUser: false,
+        hasTempWallet: false,
+        tempWalletAddress: null,
+        xrpBalance: '0',
+        tokenBalance: {
+          value: '0',
+          currency: this.currencyCode,
+          issuer: this.issuerAddress
+        }
+      };
     }
 
-    const tempAddress = user.tempWallet; // user 엔티티에 tempWalletAddress 컬럼이 있다고 가정
+    const tempAddress = user.tempWallet;
+    
+    // 사용자는 존재하지만 임시 지갑이 없는 경우
     if (!tempAddress) {
-      throw new NotFoundException(`Temporary wallet not yet created for user ${connectedWallet}`);
+      return {
+        hasUser: true,
+        hasTempWallet: false,
+        tempWalletAddress: null,
+        xrpBalance: '0',
+        tokenBalance: {
+          value: '0',
+          currency: this.currencyCode,
+          issuer: this.issuerAddress
+        }
+      };
     }
 
-    let balances: xrpl.Balance[]; // getBalances의 반환 타입을 명시
+    // 임시 지갑이 존재하는 경우 - 실제 잔액 조회
+    let balances: xrpl.Balance[];
     try {
-        // 2. XRPL 네트워크에 임시 지갑의 잔액을 조회합니다.
         balances = await this.xrplClient.getBalances(tempAddress);
     } catch (error) {
-        // 네트워크 통신에 문제가 있거나, 주소가 활성화되지 않은 경우 등의 오류를 처리합니다.
         this.logger.error(`Failed to get balances for address: ${tempAddress}`, error);
-        // 클라이언트에게는 서비스 자체의 문제임을 알립니다.
-        throw new ServiceUnavailableException('Could not retrieve balances from the XRP Ledger.');
+        // XRPL 조회 실패 시에도 임시 지갑은 존재한다고 표시하되 잔액은 0으로 처리
+        return {
+          hasUser: true,
+          hasTempWallet: true,
+          tempWalletAddress: tempAddress,
+          xrpBalance: '0',
+          tokenBalance: {
+            value: '0',
+            currency: this.currencyCode,
+            issuer: this.issuerAddress
+          }
+        };
     }
+    
     const xrpBalance = balances.find(b => b.currency === 'XRP')?.value || '0';
     const iou = balances.find(b => b.currency === this.currencyCode && b.issuer === this.issuerAddress);
 
     return {
+        hasUser: true,
+        hasTempWallet: true,
         tempWalletAddress: tempAddress,
         xrpBalance,
         tokenBalance: {
             value: iou?.value || '0',
             currency: this.currencyCode,
             issuer: this.issuerAddress
-        },
+        }
     };
   }
 

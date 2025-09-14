@@ -39,7 +39,12 @@ export class PlayService {
     private readonly configService: ConfigService,
   ) {
       // 환경 변수 가져오기
-      this.serverWallet = xrpl.Wallet.fromSeed(this.configService.get<string>('SERVER_SEED'));
+      try {
+        this.serverWallet = xrpl.Wallet.fromSeed(this.configService.get<string>('SERVER_SEED'));
+      } catch (error) {
+        this.logger.warn('Invalid SERVER_SEED, using dummy wallet');
+        this.serverWallet = xrpl.Wallet.generate();
+      }
       this.issuerAddress = this.configService.get<string>('ISSUER_ADDRESS', 'PORTrJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a');
       this.currencyCode = this.configService.get<string>('TOKEN_CURRENCY_CODE', 'USD');
       //서비스가 초기화될 때 XRPL 클라이언트를 생성하고 연결
