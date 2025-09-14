@@ -11,6 +11,7 @@ import { PlayModule } from './play/play.module';
 import { AssetsModule } from './assets/assets.module';
 import { BillingModule } from './billing/billing.module';
 import { ChainModule } from './chain/chain.module';
+import { DevelopersModule } from './developers/developers.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ChainModule } from './chain/chain.module';
     AssetsModule,
     BillingModule,
     ChainModule,
+    DevelopersModule,
   ],
 })
 export class AppModule {}

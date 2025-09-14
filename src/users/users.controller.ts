@@ -4,6 +4,7 @@ import {
   Get,
   Body,
   Param,
+  Query,
   HttpStatus,
   HttpCode,
   NotFoundException,
@@ -13,6 +14,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -186,6 +188,47 @@ export class UsersController {
   })
   async findById(@Param('id') id: string): Promise<User> {
     return this.usersService.findById(id);
+  }
+
+  @Get('profile')
+  @ApiOperation({ summary: '마이프로필 조회' })
+  @ApiQuery({
+    name: 'user_id',
+    description: '사용자 UUID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '프로필 조회 성공',
+    type: User,
+    schema: {
+      example: {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        wallet: 'rKGPzJNr5HgP3HPpkkm4ofE1yTv6K2eLoV',
+        status: 'ACTIVE',
+        tempWallet: null,
+        isFirstChargeCompleted: false,
+        createdAt: '2024-01-15T10:30:00.000Z',
+        updatedAt: '2024-01-15T10:30:00.000Z'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 404,
+    description: '사용자를 찾을 수 없음',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'User with ID 550e8400-e29b-41d4-a716-446655440000 not found'
+      }
+    }
+  })
+  async getMyProfile(@Query('user_id') userId: string): Promise<User> {
+    if (!userId) {
+      throw new NotFoundException('user_id is required');
+    }
+    return this.usersService.findById(userId);
   }
 
   @Post('wallet-connect')
