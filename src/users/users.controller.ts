@@ -24,6 +24,7 @@ import { WalletResponseDto } from './dto/wallet-response.dto';
 import { BalanceRequestDto, BalanceResponseDto  } from './dto/check-balance.dto';
 import { ActivateDeveloperRequestDto, ActivateDeveloperResponseDto } from './dto/activate-developer.dto';
 import { SubmitTrustlineRequestDto, SubmitTrustlineResponseDto } from './dto/submit-trustline.dto';
+import { RewardRequestDto,RewardResponseDto } from './dto/rewards.dto';
 import { User } from './user.entity';
 
 @ApiTags('사용자')
@@ -338,5 +339,16 @@ export class UsersController {
       submitDto.walletAddress, 
       submitDto.signedTransaction
     );
+  }
+
+  @Post('rewards')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '광고 시청 보상 지급 (XRP)', description: '서버 지갑에서 사용자 지갑으로 소량의 XRP를 전송합니다.' })
+  @ApiResponse({ status: 200, description: "보상 지급 성공", type: RewardResponseDto })
+  @ApiResponse({ status: 500, description: "서버 오류 또는 트랜잭션 실패" })
+  async grantReward(
+    @Body() rewardRequestDto: RewardRequestDto,
+  ): Promise<RewardResponseDto> {
+    return this.usersService.grantAdReward(rewardRequestDto.walletAddress);
   }
 }
