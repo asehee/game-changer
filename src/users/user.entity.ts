@@ -57,14 +57,6 @@ export class User {
   isFirstChargeCompleted: boolean;
 
   @ApiProperty({
-    description: '개발자 여부',
-    example: false
-  })
-  @Column({ type: 'boolean', default: false })
-  @Index('idx_users_developer')
-  isDeveloper: boolean;
-
-  @ApiProperty({
     description: '사용자 생성 시간',
     example: '2024-01-15T10:30:00.000Z'
   })
@@ -85,7 +77,7 @@ export class User {
   })
   @Column({ type: 'boolean', default: false })
   isDeveloper: boolean;
-  
+
   @OneToMany(() => PlaySession, (session) => session.user)
   playSessions: PlaySession[];
 }

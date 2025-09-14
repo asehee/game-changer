@@ -38,8 +38,8 @@ export class PlayService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {
-      // 개발용 랜덤 지갑 생성
-      this.serverWallet = xrpl.Wallet.generate();
+      // 환경 변수 가져오기
+      this.serverWallet = xrpl.Wallet.fromSeed(this.configService.get<string>('SERVER_SEED'));
       this.issuerAddress = this.configService.get<string>('ISSUER_ADDRESS', 'PORTrJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a');
       this.currencyCode = this.configService.get<string>('TOKEN_CURRENCY_CODE', 'USD');
       //서비스가 초기화될 때 XRPL 클라이언트를 생성하고 연결
@@ -65,6 +65,7 @@ export class PlayService {
     if (!xrpBalance || parseFloat(xrpBalance.value) < requiredFeeXRP + TEMP_BASE_RESERVE) {
         throw new ForbiddenException(`Insufficient XRP (${xrpBalance}) for transaction fee. Required: ~${requiredFeeXRP} XRP`);
     }
+    this.logger.log('Balance check passed.');
 
     const paymentTx: xrpl.Payment = {
       TransactionType: "Payment",
@@ -108,12 +109,7 @@ export class PlayService {
       throw new NotFoundException('Game not found or inactive');
     }
     const { ratePerSession, developerId } = game;
-
-    // 개발자 정보 조회
     const developer = await this.usersService.findById(developerId);
-    if (!developer) {
-      throw new NotFoundException('Developer not found');
-    }
 
     // 결제 로직 추가
     if (!user.tempWallet) {
@@ -198,14 +194,8 @@ export class PlayService {
       throw new NotFoundException('Game not found or inactive');
     }
     const { ratePerSession, developerId } = game;
-
-    // 개발자 정보 조회
-    const developer = await this.usersService.findById(developerId);
-    if (!developer) {
-      throw new NotFoundException('Developer not found');
-    }
-
     const user = await this.usersService.findById(userId);
+    const developer = await this.usersService.findById(developerId);
     // 결제 로직 추가
     if (!user.tempWallet) {
       this.logger.error(`User ${userId} has no temporary wallet for payment.`);
@@ -323,4 +313,5 @@ export class PlayService {
       expiresIn: `${ttlSeconds}s`,
     });
   }
+
 }

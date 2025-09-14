@@ -81,11 +81,11 @@ export class CreateGameDto {
   version: string;
 
   @ApiProperty({ 
-    description: '게임 개발자 지갑 주소', 
-    example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH'
+    description: '게임 개발자 ID', 
+    example: '550e8400-e29b-41d4-a716-446655440000'
   })
   @IsString()
-  developerAddress: string;
+  developerId: string;
 
   @ApiProperty({
     description: '총 플레이어 수',
