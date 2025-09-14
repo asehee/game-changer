@@ -21,6 +21,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { WalletConnectDto } from './dto/wallet-connect.dto';
 import { FirstChargeDto } from './dto/first-charge.dto';
 import { WalletResponseDto } from './dto/wallet-response.dto';
+import { BalanceRequestDto, BalanceResponseDto  } from './dto/check-balance.dto';
 import { User } from './user.entity';
 
 @ApiTags('사용자')
@@ -298,4 +299,18 @@ export class UsersController {
       received: tempAddress,
     };
   }
+
+  @Post('balance') // 🔥 1. POST /api/users/balance 로 변경
+  @HttpCode(HttpStatus.OK) // 성공 시 200 OK 상태 코드 반환
+  @ApiOperation({ summary: "사용자의 임시 지갑 잔액 조회 (인증 없음)" })
+  @ApiResponse({ status: 200, description: "잔액 조회 성공", type: BalanceResponseDto })
+  @ApiResponse({ status: 404, description: "사용자 또는 임시 지갑을 찾을 수 없음" })
+  async getTempWalletBalance(
+    // 🔥 2. @Param 대신 @Body를 사용하여 요청 본문에서 데이터를 가져옵니다.
+    @Body() balanceRequestDto: BalanceRequestDto,
+  ): Promise<BalanceResponseDto> {
+    // 🔥 3. DTO에서 walletAddress를 추출하여 서비스로 전달합니다.
+    return this.usersService.checkTempWalletBalance(balanceRequestDto.walletAddress);
+  }
+
 }
