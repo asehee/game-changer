@@ -44,13 +44,13 @@ export class UsersController {
     schema: {
       example: {
         id: '550e8400-e29b-41d4-a716-446655440000',
-        wallet: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
+        wallet: 'rhyPxjcZeYJyMk8f8qF7QL4mids65arMnB',
         status: 'ACTIVE',
-        connectedWallet: null,
         tempWallet: null,
         isFirstChargeCompleted: false,
         createdAt: '2024-01-15T10:30:00.000Z',
-        updatedAt: '2024-01-15T10:30:00.000Z'
+        updatedAt: '2024-01-15T10:30:00.000Z',
+        isDeveloper: false,
       }
     }
   })
@@ -91,13 +91,13 @@ export class UsersController {
     schema: {
       example: {
         id: '550e8400-e29b-41d4-a716-446655440000',
-        wallet: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
+        wallet: 'rhyPxjcZeYJyMk8f8qF7QL4mids65arMnB',
         status: 'ACTIVE',
-        connectedWallet: null,
         tempWallet: null,
         isFirstChargeCompleted: false,
         createdAt: '2024-01-15T10:30:00.000Z',
-        updatedAt: '2024-01-15T10:30:00.000Z'
+        updatedAt: '2024-01-15T10:30:00.000Z',
+        isDeveloper: false,
       }
     }
   })
@@ -121,7 +121,7 @@ export class UsersController {
   @ApiParam({
     name: 'walletAddress',
     description: '지갑 주소',
-    example: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
+    example: 'rhyPxjcZeYJyMk8f8qF7QL4mids65arMnB',
   })
   @ApiResponse({
     status: 200,
@@ -129,13 +129,13 @@ export class UsersController {
     schema: {
       example: {
         id: '550e8400-e29b-41d4-a716-446655440000',
-        wallet: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
+        wallet: 'rhyPxjcZeYJyMk8f8qF7QL4mids65arMnB',
         status: 'ACTIVE',
-        connectedWallet: null,
         tempWallet: null,
         isFirstChargeCompleted: false,
         createdAt: '2024-01-15T10:30:00.000Z',
-        updatedAt: '2024-01-15T10:30:00.000Z'
+        updatedAt: '2024-01-15T10:30:00.000Z',
+        isDeveloper: false,
       }
     }
   })
@@ -145,7 +145,7 @@ export class UsersController {
     schema: {
       example: {
         statusCode: 404,
-        message: 'User with wallet 0x742d35Cc6635C0532925a3b8D598544e15B9a0E6 not found'
+        message: 'User with wallet rhyPxjcZeYJyMk8f8qF7QL4mids65arMnB not found'
       }
     }
   })
@@ -170,13 +170,13 @@ export class UsersController {
     schema: {
       example: {
         id: '550e8400-e29b-41d4-a716-446655440000',
-        wallet: '0x742d35Cc6635C0532925a3b8D598544e15B9a0E6',
+        wallet: 'rhyPxjcZeYJyMk8f8qF7QL4mids65arMnB',
         status: 'ACTIVE',
-        connectedWallet: null,
         tempWallet: null,
         isFirstChargeCompleted: false,
         createdAt: '2024-01-15T10:30:00.000Z',
-        updatedAt: '2024-01-15T10:30:00.000Z'
+        updatedAt: '2024-01-15T10:30:00.000Z',
+        isDeveloper: false,
       }
     }
   })
@@ -209,12 +209,13 @@ export class UsersController {
     schema: {
       example: {
         id: '550e8400-e29b-41d4-a716-446655440000',
-        wallet: 'rKGPzJNr5HgP3HPpkkm4ofE1yTv6K2eLoV',
+        wallet: 'rhyPxjcZeYJyMk8f8qF7QL4mids65arMnB',
         status: 'ACTIVE',
         tempWallet: null,
         isFirstChargeCompleted: false,
         createdAt: '2024-01-15T10:30:00.000Z',
-        updatedAt: '2024-01-15T10:30:00.000Z'
+        updatedAt: '2024-01-15T10:30:00.000Z',
+        isDeveloper: false,
       }
     }
   })
@@ -233,34 +234,6 @@ export class UsersController {
       throw new NotFoundException('user_id is required');
     }
     return this.usersService.findById(userId);
-  }
-
-  @Post('wallet-connect')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
-    summary: '지갑 연결',
-    description: '연결된 지갑 주소를 수신하고 처리합니다'
-  })
-  @ApiResponse({
-    status: 200,
-    description: '지갑 연결 성공',
-    type: WalletResponseDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '잘못된 요청: connectedAddress가 필요합니다',
-  })
-  async walletConnect(@Body() walletConnectDto: WalletConnectDto): Promise<WalletResponseDto> {
-    const { connectedAddress } = walletConnectDto;
-    
-    console.log('📩 Received wallet address:', connectedAddress);
-    
-    const user = await this.usersService.findOrCreateByConnectedWallet(connectedAddress);
-    
-    return {
-      success: true,
-      received: connectedAddress,
-    };
   }
 
   @Post('first-charge')
