@@ -3,6 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChainService } from './chain.service';
 import { TokenMetadataResponseDto } from './dto/token-metadata-response.dto';
 import { SendSignedTxResponseDto, SendSignedTxRequestDto } from './dto/send-signed-tx.dto';
+import { TokenFaucetDto } from './dto/tokenfaucet.dto';
 
 @ApiTags('블록체인')
 @Controller('api/chain')
@@ -34,5 +35,20 @@ export class ChainController {
       sendSignedTxDto.txType,
       sendSignedTxDto.walletAddress
     );
+  }
+
+  @Post('tokenfaucet')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ 
+    summary: '테스트 토큰 지급', 
+    description: '서버의 자금 지갑에서 요청한 사용자에게 미리 정의된 양의 테스트 IOU 토큰을 전송합니다.' 
+  })
+  @ApiResponse({ status: 200, description: '토큰 지급 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  @ApiResponse({ status: 500, description: '서버 내부 오류 또는 트랜잭션 실패' })
+  async sendTestToken(
+    @Body() tokenFaucetDto: TokenFaucetDto,
+  ): Promise<{ status: string; hash: string; }> {
+    return this.chainService.sendTestToken(tokenFaucetDto.walletAddress);
   }
 }
