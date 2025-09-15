@@ -97,13 +97,8 @@ export class UsersService {
     if (user.isFirstChargeCompleted) {
       throw new ConflictException('First charge has already been completed for this user');
     }
-    user.tempWallet = tempWallet;
-    return this.userRepository.save(user);
-  }
-
-  async completeFirstCharge(userId: string): Promise<User> {
-    const user = await this.findById(userId);
     user.isFirstChargeCompleted = true;
+    user.tempWallet = tempWallet;
     return this.userRepository.save(user);
   }
 
@@ -124,73 +119,40 @@ export class UsersService {
   }
 
   async checkTempWalletBalance(connectedWallet: string): Promise<BalanceResponseDto> {
-    let user = await this.findByConnectedWallet(connectedWallet);
-    
-    // 사용자가 존재하지 않는 경우
+    const user = await this.findByConnectedWallet(connectedWallet);
     if (!user) {
-      return {
-        hasUser: false,
-        hasTempWallet: false,
-        tempWalletAddress: null,
-        xrpBalance: '0',
-        tokenBalance: {
-          value: '0',
-          currency: this.currencyCode,
-          issuer: this.issuerAddress
-        }
-      };
+      this.logger.warn(`User not found for wallet: ${connectedWallet}`);
+      throw new NotFoundException(`User with wallet ${connectedWallet} not found.`);
     }
 
-    const tempAddress = user.tempWallet;
-    
-    // 사용자는 존재하지만 임시 지갑이 없는 경우
-    if (!tempAddress) {
-      return {
-        hasUser: true,
-        hasTempWallet: false,
-        tempWalletAddress: null,
-        xrpBalance: '0',
-        tokenBalance: {
-          value: '0',
-          currency: this.currencyCode,
-          issuer: this.issuerAddress
-        }
-      };
+    const tempWallet = user.tempWallet;
+    if (!tempWallet) {
+      this.logger.warn(`Temp wallet not found for user: ${user.id}`);
+      throw new NotFoundException(`Temporary wallet not yet created for this user.`);
     }
 
-    // 임시 지갑이 존재하는 경우 - 실제 잔액 조회
+    // XRPL 조회 실패 시 503 Service Unavailable 에러
     let balances: xrpl.Balance[];
     try {
-        balances = await this.xrplClient.getBalances(tempAddress);
+      balances = await this.xrplClient.getBalances(tempWallet);
     } catch (error) {
-        this.logger.error(`Failed to get balances for address: ${tempAddress}`, error);
-        // XRPL 조회 실패 시에도 임시 지갑은 존재한다고 표시하되 잔액은 0으로 처리
-        return {
-          hasUser: true,
-          hasTempWallet: true,
-          tempWalletAddress: tempAddress,
-          xrpBalance: '0',
-          tokenBalance: {
-            value: '0',
-            currency: this.currencyCode,
-            issuer: this.issuerAddress
-          }
-        };
+      this.logger.error(`Failed to get balances for address: ${tempWallet}`, error);
+      throw new ServiceUnavailableException('Could not connect to the XRP Ledger to fetch balances.');
+    }
+    
+    // (방어 코드) balances가 배열이 아닐 경우 500 Internal Server 에러
+    if (!Array.isArray(balances)) {
+      this.logger.error(`Unexpected response format from getBalances for ${tempWallet}`, balances);
+      throw new InternalServerErrorException('Received an unexpected response format.');
     }
     
     const xrpBalance = balances.find(b => b.currency === 'XRP')?.value || '0';
-    const iou = balances.find(b => b.currency === this.currencyCode && b.issuer === this.issuerAddress);
+    const iouBalanceInfo = balances.find(b => b.currency === this.currencyCode && b.issuer === this.issuerAddress);
 
     return {
-        hasUser: true,
-        hasTempWallet: true,
-        tempWalletAddress: tempAddress,
-        xrpBalance,
-        tokenBalance: {
-            value: iou?.value || '0',
-            currency: this.currencyCode,
-            issuer: this.issuerAddress
-        }
+        tempWallet: tempWallet,
+        xrpBalance: xrpBalance,
+        tokenBalance: iouBalanceInfo?.value.toString() || '0'
     };
   }
 
