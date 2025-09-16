@@ -1,13 +1,18 @@
 import {
   Controller,
   Get,
+  Post,
   Param,
   Query,
+  HttpCode,
+  HttpStatus,
+  Body,
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { DevelopersService } from './developers.service';
+import { ActivateRequestDto, ActivateResponseDto } from './dto/activate.dto';
 
 @ApiTags('개발자')
 @Controller('developers')
@@ -206,4 +211,21 @@ export class DevelopersController {
       throw new BadRequestException(error.message);
     }
   }
+
+  @Post('activate')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '서명된 TrustSet 트랜잭션을 제출하여 개발자를 최종 활성화 (인증 없음)' })
+  @ApiResponse({ status: 200, description: '개발자 활성화 성공', type: ActivateResponseDto })
+  @ApiResponse({ status: 400, description: '트랜잭션 제출 실패 또는 잘못된 서명' })
+  async submitTrustline(
+    @Body() activateDto: ActivateRequestDto,
+  ): Promise<ActivateResponseDto> {
+    
+    // 🔥 3. DTO에서 필요한 값들을 추출하여 서비스로 전달합니다.
+    return this.developersService.activate(
+      activateDto.walletAddress, 
+      activateDto.signedTransaction
+    );
+  }
+
 }

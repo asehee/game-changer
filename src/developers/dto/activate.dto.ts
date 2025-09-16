@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class SubmitTrustlineRequestDto {
+export class ActivateRequestDto {
   @ApiProperty({
     description: '서명을 생성한 사용자의 메인 지갑 주소',
     example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
@@ -14,7 +14,7 @@ export class SubmitTrustlineRequestDto {
   signedTransaction: string;
 }
 
-export class SubmitTrustlineResponseDto {
+export class ActivateResponseDto {
   @ApiProperty({
     description: '처리 상태',
     example: 'activated',

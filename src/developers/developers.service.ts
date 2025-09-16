@@ -1,13 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DeveloperStats } from './developer-stats.entity';
 import { User } from '../users/user.entity';
 import { Game } from '../games/game.entity';
+import { ActivateResponseDto } from './dto/activate.dto';
 import { PlaySession } from '../play/play-session.entity';
+import * as xrpl from 'xrpl';
 
 @Injectable()
 export class DevelopersService {
+  private readonly logger = new Logger(DevelopersService.name);
+  private readonly xrplClient: xrpl.Client; // XRPL 클라이언트 인스턴스
+
   constructor(
     @InjectRepository(DeveloperStats)
     private developerStatsRepository: Repository<DeveloperStats>,
@@ -225,4 +230,41 @@ export class DevelopersService {
 
     return user;
   }
+
+  async activate(wallet: string, signedTx: string): Promise<ActivateResponseDto> {
+    let user = await this.userRepository.findOne({ where: { wallet } });
+    if (!user) {
+      throw new NotFoundException(`User with address ${wallet} not found`);
+    }
+
+    this.logger.log(`Submitting TrustSet transaction for user ${wallet}`);
+    try {
+      const result = await this.xrplClient.submitAndWait(signedTx);
+      const meta = result.result.meta;
+      if (typeof meta === 'object' && meta !== null && 'TransactionResult' in meta) {
+        if (meta.TransactionResult !== 'tesSUCCESS') {
+          // 트랜잭션이 실패한 경우
+          this.logger.error('Trustline submission failed on ledger', result);
+          throw new BadRequestException(`Transaction failed on ledger: ${meta.TransactionResult}`);
+        }
+      } else {
+        // 예상치 못한 응답 형식
+        throw new BadRequestException('Unexpected response format from XRPL.');
+      }
+      
+      user.isDeveloper = true;
+      await this.userRepository.save(user);
+      
+      this.logger.log(`User ${user.id} has been successfully activated as a developer.`);
+
+      return {
+        status: 'activated',
+        message: 'Developer status successfully activated.',
+      };
+
+    } catch (error) {
+      this.logger.error(`Failed to get submit signed trustset transction for address: ${wallet}`, error);
+    }
+  }
+
 }
