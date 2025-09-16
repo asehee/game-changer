@@ -15,7 +15,7 @@ import { DevelopersService } from './developers.service';
 import { ActivateRequestDto, ActivateResponseDto } from './dto/activate.dto';
 
 @ApiTags('개발자')
-@Controller('developers')
+@Controller('api/developers')
 export class DevelopersController {
   constructor(private readonly developersService: DevelopersService) {}
 
@@ -222,10 +222,7 @@ export class DevelopersController {
   ): Promise<ActivateResponseDto> {
     
     // 🔥 3. DTO에서 필요한 값들을 추출하여 서비스로 전달합니다.
-    return this.developersService.activate(
-      activateDto.walletAddress, 
-      activateDto.signedTransaction
-    );
+    return this.developersService.activate(activateDto.walletAddress);
   }
 
 }

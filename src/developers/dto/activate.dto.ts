@@ -6,12 +6,6 @@ export class ActivateRequestDto {
     example: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
   })
   walletAddress: string;
-  
-  @ApiProperty({
-    description: 'GemWallet으로부터 받은, 서명된 트랜잭션 헥스(hex) 문자열',
-    example: '12000022800000002400000014614000000001234567...',
-  })
-  signedTransaction: string;
 }
 
 export class ActivateResponseDto {

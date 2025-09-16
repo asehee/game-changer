@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, ServiceUnavailableException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { DeveloperStats } from './developer-stats.entity';
 import { User } from '../users/user.entity';
 import { Game } from '../games/game.entity';
@@ -12,6 +13,8 @@ import * as xrpl from 'xrpl';
 export class DevelopersService {
   private readonly logger = new Logger(DevelopersService.name);
   private readonly xrplClient: xrpl.Client; // XRPL 클라이언트 인스턴스
+  private readonly issuerAddress: string;
+  private readonly currencyCode: string;
 
   constructor(
     @InjectRepository(DeveloperStats)
@@ -22,7 +25,13 @@ export class DevelopersService {
     private gameRepository: Repository<Game>,
     @InjectRepository(PlaySession)
     private playSessionRepository: Repository<PlaySession>,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.issuerAddress = this.configService.get<string>('ISSUER_ADDRESS', 'PORTrJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a');
+    this.currencyCode = this.configService.get<string>('TOKEN_CURRENCY_CODE', 'USD');
+    this.xrplClient = new xrpl.Client(this.configService.get<string>('TESTNET', 'wss://s.altnet.rippletest.net:51233'));
+    this.xrplClient.connect().then(() => { this.logger.log('XRPL Client connected successfully.');});
+  }
 
   async getDeveloperDashboard(walletAddress: string) {
     // 개발자 조회
@@ -231,40 +240,47 @@ export class DevelopersService {
     return user;
   }
 
-  async activate(wallet: string, signedTx: string): Promise<ActivateResponseDto> {
-    let user = await this.userRepository.findOne({ where: { wallet } });
+  async activate(wallet: string): Promise<ActivateResponseDto> {
+    let user = await this.userRepository.findOne({ where: { wallet: wallet } });
     if (!user) {
       throw new NotFoundException(`User with address ${wallet} not found`);
     }
 
-    this.logger.log(`Submitting TrustSet transaction for user ${wallet}`);
+    if (user.isDeveloper) {
+      this.logger.log(`User ${wallet} is already an active developer.`);
+      return { status: 'already_active', message: 'User is already an active developer.' };
+    }
+
+    this.logger.log(`Checking trustline for user ${wallet}...`);
     try {
-      const result = await this.xrplClient.submitAndWait(signedTx);
-      const meta = result.result.meta;
-      if (typeof meta === 'object' && meta !== null && 'TransactionResult' in meta) {
-        if (meta.TransactionResult !== 'tesSUCCESS') {
-          // 트랜잭션이 실패한 경우
-          this.logger.error('Trustline submission failed on ledger', result);
-          throw new BadRequestException(`Transaction failed on ledger: ${meta.TransactionResult}`);
-        }
+      const accountLines = await this.xrplClient.request({
+        command: 'account_lines',
+        account: wallet,
+        peer: this.issuerAddress,
+      });
+
+      const trustline = accountLines.result.lines.find(line => line.currency === this.currencyCode);
+
+      if (trustline) {
+        user.isDeveloper = true;
+        await this.userRepository.save(user);
+        this.logger.log(`User ${wallet} has been successfully activated as a developer.`);
+        
+        return {
+          status: 'activated',
+          message: 'Developer status successfully activated.',
+        };
       } else {
-        // 예상치 못한 응답 형식
-        throw new BadRequestException('Unexpected response format from XRPL.');
+        // 신뢰선이 존재하지 않으면, 에러 반환
+        this.logger.warn(`User ${wallet} attempted to activate without a valid trustline.`);
+        // 신뢰선 먼저 set하고 다시 시도하란뜻
+        throw new ForbiddenException('A trustline for the platform token must be set before activating developer status.');
       }
-      
-      user.isDeveloper = true;
-      await this.userRepository.save(user);
-      
-      this.logger.log(`User ${user.id} has been successfully activated as a developer.`);
-
-      return {
-        status: 'activated',
-        message: 'Developer status successfully activated.',
-      };
-
     } catch (error) {
-      this.logger.error(`Failed to get submit signed trustset transction for address: ${wallet}`, error);
+      // account_lines 조회 중 에러 발생 시 (예: 네트워크 문제)
+      this.logger.error(`Failed to check trustlines for ${wallet}`, error);
+      throw new ServiceUnavailableException('Failed to verify trustline with the XRP Ledger.');
     }
   }
-
 }
+
