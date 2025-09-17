@@ -155,15 +155,24 @@ export class UsersService {
   }
 
   async grantAdReward(userAddress: string): Promise<RewardResponseDto> {
-    // 1. .env 파일에서 보상 금액을 가져옴 (디폴트값 0.1)
-    const serverSeed = this.configService.get<string>('SERVER_SEED');
     const rewardAmountXRP = this.configService.get<string>('AD_REWARD_XRP', '0.1'); // 기본값 0.1 XRP
+    const user = await this.findByConnectedWallet(userAddress);
+    if (!user) {
+      this.logger.warn(`User not found for wallet: ${userAddress}`);
+      throw new NotFoundException(`User with wallet ${userAddress} not found.`);
+    }
+
+    const tempWallet = user.tempWallet;
+    if (!tempWallet) {
+      this.logger.warn(`Temp wallet not found for user: ${user.id}`);
+      throw new NotFoundException(`Temporary wallet not yet created for this user.`);
+    }
 
     // 2. Payment 트랜잭션을 생성
     const paymentTx: xrpl.Payment = {
       TransactionType: 'Payment',
       Account: this.serverWallet.address, // 보내는 사람: 서버 지갑
-      Destination: userAddress,      // 받는 사람: 사용자 지갑
+      Destination: tempWallet,      // 받는 사람: 사용자 지갑
       Amount: xrpl.xrpToDrops(rewardAmountXRP), // 보상 금액 (drop 단위로 변환)
     };
 
@@ -183,7 +192,7 @@ export class UsersService {
         throw new InternalServerErrorException('Payment failed due to an unexpected response format.');
       }
 
-      this.logger.log(`Successfully sent ${rewardAmountXRP} XRP to ${userAddress}. Tx Hash: ${result.result.hash}`);
+      this.logger.log(`Successfully sent ${rewardAmountXRP} XRP to ${tempWallet}. Tx Hash: ${result.result.hash}`);
       
       // 5. 성공 응답을 반환
       return {
@@ -193,7 +202,7 @@ export class UsersService {
       };
 
     } catch (error) {
-      this.logger.error(`Failed to grant reward to ${userAddress}`, error);
+      this.logger.error(`Failed to grant reward to ${tempWallet}`, error);
       if (error instanceof Error) {
         throw new InternalServerErrorException(`Failed to submit transaction: ${error.message}`);
       }
