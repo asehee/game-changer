@@ -9,7 +9,16 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+          "frame-ancestors": ["'self'", "http://localhost:5173"], // Vite 기본 포트인 5173 예시
+        },
+      },
+    }),
+  );
   
   app.enableCors({
     origin: configService.get('CORS_ORIGINS', '*'),

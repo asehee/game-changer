@@ -47,6 +47,7 @@ export class GamesController {
       price: createGameDto.price || 0.0,
       discount: createGameDto.discount || 0,
       version: createGameDto.version,
+      developerId: createGameDto.developerId,
       isActive: true,
       ratePerSession: createGameDto.ratePerSession,
     });

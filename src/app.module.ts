@@ -12,6 +12,8 @@ import { AssetsModule } from './assets/assets.module';
 import { BillingModule } from './billing/billing.module';
 import { ChainModule } from './chain/chain.module';
 import { DevelopersModule } from './developers/developers.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -28,6 +30,10 @@ import { DevelopersModule } from './developers/developers.module';
       ttl: 60000,
       limit: 100,
     }]),
+    ServeStaticModule.forRoot({
+      serveRoot: '/games', 
+      rootPath: join(__dirname, '..', 'public'),
+    }),
     ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,

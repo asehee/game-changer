@@ -113,6 +113,7 @@ export class PlayService {
     if (!game) {
       throw new NotFoundException('Game not found or inactive');
     }
+    
     const { ratePerSession, developerId } = game;
     const developer = await this.usersService.findById(developerId);
 
@@ -134,6 +135,7 @@ export class PlayService {
       status: SessionStatus.ACTIVE,
       expiresAt: new Date(Date.now() + ttlSeconds * 1000),
       lastHeartbeatAt: new Date(),
+      developerId: developerId,
       billingStatus: BillingStatus.OK,
     });
 
