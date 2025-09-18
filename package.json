@@ -18,7 +18,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "seed": "npx ts-node -r tsconfig-paths/register scripts/seed.ts"
-  },  
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -36,6 +36,7 @@
     "@nestjs/throttler": "^5.2.0",
     "@nestjs/typeorm": "^10.0.2",
     "@types/passport-jwt": "^4.0.1",
+    "@types/uuid": "^8.3.4",
     "axios": "^1.12.1",
     "better-sqlite3": "^9.6.0",
     "class-transformer": "^0.5.1",
@@ -50,7 +51,7 @@
     "sqlite3": "^5.1.7",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.20",
-    "uuid": "^13.0.0",
+    "uuid": "^8.3.2",
     "xrpl": "^4.4.1"
   },
   "devDependencies": {
