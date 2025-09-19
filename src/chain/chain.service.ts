@@ -1,7 +1,8 @@
-import { Injectable, Logger, ForbiddenException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Logger, ForbiddenException, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TokenMetadataResponseDto } from './dto/token-metadata-response.dto';
 import * as xrpl from 'xrpl';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ChainService {
@@ -11,18 +12,21 @@ export class ChainService {
   private readonly issuerAddress: string;
   private readonly currencyCode: string;
 
-  constructor(private readonly configService: ConfigService) {
-    try {
-      this.serverWallet = xrpl.Wallet.fromSeed(this.configService.get<string>('SERVER_SEED'));
-    } catch (error) {
-      this.logger.warn('Invalid SERVER_SEED, using dummy wallet');
-      this.serverWallet = xrpl.Wallet.generate();
-    }
-    this.issuerAddress = this.configService.get<string>('ISSUER_ADDRESS', 'PORTrJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a');
-    this.currencyCode = this.configService.get<string>('TOKEN_CURRENCY_CODE', 'USD');
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly usersService: UsersService
+  ) {
+      try {
+        this.serverWallet = xrpl.Wallet.fromSeed(this.configService.get<string>('SERVER_SEED'));
+      } catch (error) {
+        this.logger.warn('Invalid SERVER_SEED, using dummy wallet');
+        this.serverWallet = xrpl.Wallet.generate();
+      }
+      this.issuerAddress = this.configService.get<string>('ISSUER_ADDRESS', 'PORTrJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a');
+      this.currencyCode = this.configService.get<string>('TOKEN_CURRENCY_CODE', 'USD');
 
-    this.xrplClient = new xrpl.Client(this.configService.get<string>('TESTNET', 'wss://s.altnet.rippletest.net:51233'));
-    this.xrplClient.connect().then(() => { this.logger.log('XRPL Client connected successfully.');});
+      this.xrplClient = new xrpl.Client(this.configService.get<string>('TESTNET', 'wss://s.altnet.rippletest.net:51233'));
+      this.xrplClient.connect().then(() => { this.logger.log('XRPL Client connected successfully.');});
   }
 
   getTokenMetadata(): TokenMetadataResponseDto {
@@ -74,7 +78,12 @@ export class ChainService {
     }
   }
 
-  async sendTestToken(destinationAddress: string): Promise<{ status: string; hash: string; }> {
+  async sendTestTokenToTemp(userWallet: string): Promise<{ status: string; hash: string; }> {
+    const user = await this.usersService.findByWallet(userWallet);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    } 
+    const destinationAddress = user.tempWallet;
     const faucetAmount = this.configService.get<string>('FAUCET_AMOUNT', '20'); // 기본 100개 지급
 
     this.logger.log(`Dispensing ${faucetAmount} ${this.currencyCode} to ${destinationAddress}`);
