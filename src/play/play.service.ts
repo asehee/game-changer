@@ -14,11 +14,12 @@ import { PlaySession } from './play-session.entity';
 import { UsersService } from '../users/users.service';
 import { GamesService } from '../games/games.service';
 import { BillingService } from '../billing/billing.service';
-import { SessionStatus } from '../common/enums/session-status.enum';
+import { SessionStatus,  } from '../common/enums/session-status.enum';
 import { BillingStatus } from '../common/enums/billing-status.enum';
 import { SessionJwtPayload } from '../auth/session-jwt.strategy';
 import { UserStatus } from '../common/enums/user-status.enum';
 import { TEMP_BASE_RESERVE, BASE_FEE } from '../config/xrpl.constants'; 
+import { SessionInfoDto, CurrentSessionResponseDto, GetSessionResponseDto } from './dto/start-play.dto';
 import * as xrpl from 'xrpl';
 
 @Injectable()
@@ -28,6 +29,8 @@ export class PlayService {
   private readonly serverWallet: xrpl.Wallet;
   private readonly issuerAddress: string;
   private readonly currencyCode: string;
+  private readonly ttlSeconds: number;
+  private readonly heartbeatInterval: number;
 
   constructor(
     @InjectRepository(PlaySession)
@@ -50,6 +53,8 @@ export class PlayService {
       //서비스가 초기화될 때 XRPL 클라이언트를 생성하고 연결
       this.xrplClient = new xrpl.Client(this.configService.get<string>('TESTNET', 'wss://s.altnet.rippletest.net:51233'));
       this.xrplClient.connect().then(() => { this.logger.log('XRPL Client connected successfully.');});
+      this.ttlSeconds = this.configService.get<number>('SESSION_JWT_TTL_SEC', 300);
+      this.heartbeatInterval = this.configService.get<number>('HEARTBEAT_INTERVAL_SEC', 45);
   }
   
   private async _executePayment(
@@ -103,8 +108,8 @@ export class PlayService {
     return result.result.hash; // 성공 시 트랜잭션 해시 반환
   }
 
-  async startSession(walletAddress: string, gameId: string): Promise<{ sessionToken: string; heartbeatIntervalSec: number }> {
-    const user = await this.usersService.findOrCreate(walletAddress);
+  async startSession(walletAddress: string, gameId: string): Promise<SessionInfoDto> {
+    const user = await this.usersService.findByConnectedWallet(walletAddress);
     if (user.status === UserStatus.BLOCKED) {
       throw new ForbiddenException('User is blocked');
     }
@@ -126,17 +131,17 @@ export class PlayService {
 
     await this.endPreviousSessions(user.id);
 
-    const ttlSeconds = this.configService.get<number>('SESSION_JWT_TTL_SEC', 300);
-    const heartbeatInterval = this.configService.get<number>('HEARTBEAT_INTERVAL_SEC', 45);
-
+    const expiresAt = new Date(Date.now() + this.ttlSeconds * 1000)
     const session = this.sessionRepository.create({
       userId: user.id,
       gameId,
       status: SessionStatus.ACTIVE,
-      expiresAt: new Date(Date.now() + ttlSeconds * 1000),
+      expiresAt: expiresAt,
       lastHeartbeatAt: new Date(),
       developerId: developerId,
       billingStatus: BillingStatus.OK,
+      activePlayTime: 0,
+      totalCost: ratePerSession,
     });
 
     const savedSession = await this.sessionRepository.save(session);
@@ -147,54 +152,55 @@ export class PlayService {
       sid: savedSession.id,
       uid: user.id,
       gid: gameId,
-      hb: heartbeatInterval,
+      hb: this.heartbeatInterval,
     });
 
     this.logger.log(`Session started: ${savedSession.id} for user ${user.id} (${walletAddress}) game ${gameId}`);
 
     return {
       sessionToken,
-      heartbeatIntervalSec: heartbeatInterval,
+      heartbeatIntervalSec: this.heartbeatInterval,
+      expiresAt: expiresAt.toISOString(),
+      totalCost: session.totalCost,
+      activePlayTime: session.activePlayTime
     };
   }
 
-  async heartbeat(sessionId: string, userId: string, gameId: string): Promise<string> {
+  async heartbeat(sessionId: string, userId: string, gameId: string): Promise<SessionInfoDto> {
     const session = await this.sessionRepository.findOne({
       where: {
         id: sessionId,
         userId,
         gameId,
         status: SessionStatus.ACTIVE,
-        expiresAt: MoreThan(new Date()),
       },
     });
 
     if (!session) {
-      this.logger.warn(`Heartbeat failed: session ${sessionId} not found or expired`);
-      throw new UnauthorizedException('Session not found or expired');
+      this.logger.warn(`Heartbeat failed: session ${sessionId} not found.`);
+      throw new UnauthorizedException('Session not found.');
     }
 
-    if (session.tokenRenewalCount >= 3) {
-      this.logger.warn(`Heartbeat failed: session ${sessionId} exceeded renewal limit`);
-      await this.revokeSession(sessionId, BillingStatus.STOPPED);
-      throw new ForbiddenException('Token renewal limit exceeded');
+    if (new Date(session.expiresAt) < new Date())  {
+      session.status = SessionStatus.EXPIRED
+      await this.sessionRepository.save(session)
+      this.logger.warn(`Heartbeat failed: session is expired.`);
+      throw new UnauthorizedException('Session not found.');
     }
+
+    // if (session.tokenRenewalCount >= 3) {
+    //   this.logger.warn(`Heartbeat failed: session ${sessionId} exceeded renewal limit`);
+    //   await this.revokeSession(sessionId, BillingStatus.STOPPED);
+    //   throw new ForbiddenException('Token renewal limit exceeded');
+    // }
 
     const billingStatus = await this.billingService.checkStream(sessionId);
     if (billingStatus !== BillingStatus.OK) {
       await this.revokeSession(sessionId, BillingStatus.STOPPED);
       throw new ForbiddenException('Billing stream check failed');
     }
-
-    const ttlSeconds = this.configService.get<number>('SESSION_JWT_TTL_SEC', 300);
-    const heartbeatInterval = this.configService.get<number>('HEARTBEAT_INTERVAL_SEC', 45);
-
-    session.lastHeartbeatAt = new Date();
-    session.expiresAt = new Date(Date.now() + ttlSeconds * 1000);
-    session.billingStatus = billingStatus;
-    session.tokenRenewalCount += 1;
-
-    await this.sessionRepository.save(session);
+  
+    const heartbeatInterval = this.configService.get<number>('HEARTBEAT_INTERVAL_SEC', 45);    
 
     const game = await this.gamesService.findActiveById(gameId);
     if (!game) {
@@ -210,6 +216,16 @@ export class PlayService {
     }
     await this._executePayment(user.tempWallet, developer.wallet, ratePerSession);
 
+    
+    session.expiresAt = new Date(Date.now() + this.ttlSeconds * 1000);
+    session.billingStatus = billingStatus;
+    session.tokenRenewalCount += 1;
+    session.totalCost = Number(session.totalCost) + Number(ratePerSession)
+    // 이거 뭐 정확한 방법은 아님, 막 게임 탭닫아놓고 그런 쉬는시간까지 포함되게되는데 일단 이렇게 둠
+    session.activePlayTime += (new Date().getTime() - session.lastHeartbeatAt.getTime()) / 1000;
+    session.lastHeartbeatAt = new Date();
+    await this.sessionRepository.save(session);
+
     const newToken = this.signSessionJwt({
       sid: sessionId,
       uid: userId,
@@ -219,7 +235,51 @@ export class PlayService {
 
     this.logger.log(`Heartbeat success: session ${sessionId}, renewal count: ${session.tokenRenewalCount}`);
 
-    return newToken;
+    return {
+      sessionToken: newToken,
+      heartbeatIntervalSec: this.heartbeatInterval,
+      expiresAt: session.expiresAt.toISOString(),
+      totalCost: session.totalCost,
+      activePlayTime: session.activePlayTime
+    };
+  }
+
+  async getCurrentSession(wallet: string): Promise<CurrentSessionResponseDto> {
+    const user = await this.usersService.findOrCreate(wallet);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    } 
+  
+    const session = await this.sessionRepository.findOne({
+      where: {
+        userId: user.id,
+        status: SessionStatus.ACTIVE,
+      },
+    });
+  
+    if (!session) {
+      return {
+        hasActiveSession: false
+      };
+    }
+  
+    const sessionToken = this.signSessionJwt({
+      sid: session.id,
+      uid: user.id,
+      gid: session.gameId,
+      hb: this.heartbeatInterval,
+    });
+  
+    return {
+      hasActiveSession: true,
+      sessionInfo: {
+        sessionToken,
+        heartbeatIntervalSec: this.heartbeatInterval,
+        expiresAt: session.expiresAt.toISOString(),
+        totalCost: session.totalCost,
+        activePlayTime: session.activePlayTime
+      }
+    };
   }
 
   async stopSession(sessionId: string, userId: string): Promise<void> {
@@ -321,4 +381,27 @@ export class PlayService {
     });
   }
 
+  async getSessionById(sessionId: string): Promise<GetSessionResponseDto> {
+    const session = await this.sessionRepository.findOne({
+      where: {
+        id: sessionId
+      }
+    });
+
+    if (!session) {
+      throw new NotFoundException('Session not found');
+    }
+
+    return {
+      userId: session.userId,
+      gameId: session.gameId,
+      status: session.status,
+      expiresAt: session.expiresAt.toISOString(),
+      lastHeartbeatAt: session.lastHeartbeatAt.toISOString(),
+      developerId: session.developerId,
+      billingStatus: session.billingStatus,
+      totalCost: session.totalCost,
+      activePlayTime: session.activePlayTime
+    };
+  }
 }

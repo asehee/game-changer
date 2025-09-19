@@ -56,9 +56,6 @@ export class PlaySession {
   @Column({ type: 'int', default: 0 })
   activePlayTime: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 8, nullable: true })
-  costPerSecond: number;
-
   @Column({ type: 'decimal', precision: 18, scale: 6, default: 0 })
   totalCost: number;
 
