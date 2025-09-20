@@ -3,12 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CrowdFunding } from './crowd-funding.entity';
 import { Escrow } from './escrow.entity';
 import { Game } from '../games/game.entity';
+import { User } from '../users/user.entity';
 import { CrowdFundingService } from './crowd-funding.service';
 import { CrowdFundingController } from './crowd-funding.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CrowdFunding, Escrow, Game])
+    TypeOrmModule.forFeature([CrowdFunding, Escrow, Game, User])
   ],
   controllers: [CrowdFundingController],
   providers: [CrowdFundingService],

@@ -1,10 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { CrowdFunding } from './crowd-funding.entity';
 import { Escrow } from './escrow.entity';
 import { Game } from '../games/game.entity';
+import { User } from '../users/user.entity';
 import { CrowdFundingListDto } from './dto/crowd-funding-list.dto';
+import { CrowdFundingDetailDto } from './dto/crowd-funding-detail.dto';
 
 @Injectable()
 export class CrowdFundingService {
@@ -17,6 +20,9 @@ export class CrowdFundingService {
     private readonly escrowRepository: Repository<Escrow>,
     @InjectRepository(Game)
     private readonly gameRepository: Repository<Game>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly configService: ConfigService,
   ) {}
 
   async getCrowdFundingList(): Promise<CrowdFundingListDto[]> {
@@ -72,5 +78,35 @@ export class CrowdFundingService {
     }
 
     return result;
+  }
+
+  async getCrowdFundingDetail(crowdId: string): Promise<CrowdFundingDetailDto> {
+    // 크라우드 펀딩 조회
+    const crowdFunding = await this.crowdFundingRepository.findOne({
+      where: { id: crowdId }
+    });
+
+    if (!crowdFunding) {
+      throw new NotFoundException('Crowd funding not found');
+    }
+
+    // 개발자 정보 조회
+    const developer = await this.userRepository.findOne({
+      where: { id: crowdFunding.developerId }
+    });
+
+    if (!developer) {
+      throw new NotFoundException('Developer not found');
+    }
+
+    // 환경변수에서 CONDITION 값 가져오기
+    const condition = this.configService.get<string>('CONDITION');
+
+    return {
+      wallet: developer.wallet,
+      startDate: crowdFunding.startDate.toISOString(),
+      endDate: crowdFunding.endDate.toISOString(),
+      condition: condition,
+    };
   }
 }
