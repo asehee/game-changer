@@ -181,19 +181,22 @@ export class CrowdFundingService {
 
         try {
             const preparedTx = await this.xrplClient.autofill(escrowCreateTx);
-            
-            if (!this.serverWallet?.publicKey || !this.serverWallet?.seed) {
-                throw new InternalServerErrorException('Server wallet configuration is missing');
-            }
+            preparedTx.Fee = (parseInt(preparedTx.Fee) * 3).toString();
+        
+            const signed = this.serverWallet.sign(preparedTx, true);
+            const escrowResult = await this.xrplClient.submitAndWait(signed.tx_blob);
+            // if (!this.serverWallet?.publicKey || !this.serverWallet?.seed) {
+            //     throw new InternalServerErrorException('Server wallet configuration is missing');
+            // }
 
-            const txToSign = { ...preparedTx, SigningPubKey: this.serverWallet.publicKey };
-            const { privateKey } = deriveKeypair(this.serverWallet.seed);
-            const signingData = encodeForSigning(txToSign);
-            const signature = kpSign(signingData, privateKey);
-            const signedTx = { ...txToSign, TxnSignature: signature };
+            // const txToSign = { ...preparedTx, SigningPubKey: this.serverWallet.publicKey };
+            // const { privateKey } = deriveKeypair(this.serverWallet.seed);
+            // const signingData = encodeForSigning(txToSign);
+            // const signature = kpSign(signingData, privateKey);
+            // const signedTx = { ...txToSign, TxnSignature: signature };
 
-            const tx_blob = encode(signedTx);
-            const escrowResult = await this.xrplClient.submitAndWait(tx_blob);
+            // const tx_blob = encode(signedTx);
+            //const escrowResult = await this.xrplClient.submitAndWait(tx_blob);
             const sequence = preparedTx.Sequence;
 
             const meta = escrowResult.result.meta;
