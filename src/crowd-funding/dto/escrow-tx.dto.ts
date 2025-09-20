@@ -39,3 +39,23 @@ export class EscrowTxResponseDto {
   })
   escrowId: string;
 }
+
+export class CreateEscrowTxDto {
+  @ApiProperty({
+    description: '사용자 ID',
+    example: '1'
+  })
+  userId: string;
+
+  @ApiProperty({
+    description: '크라우드 펀딩 ID',
+    example: '1'
+  })
+  crowdId: string;
+
+  @ApiProperty({
+    description: '에스크로 금액',
+    example: '100.00'
+  })
+  amount: string;
+}

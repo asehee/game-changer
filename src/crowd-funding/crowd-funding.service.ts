@@ -8,7 +8,7 @@ import { Game } from '../games/game.entity';
 import { User } from '../users/user.entity';
 import { CrowdFundingListDto } from './dto/crowd-funding-list.dto';
 import { CrowdFundingDetailDto } from './dto/crowd-funding-detail.dto';
-import { EscrowTxDto, EscrowTxResponseDto } from './dto/escrow-tx.dto';
+import { CreateEscrowTxDto, EscrowTxDto, EscrowTxResponseDto } from './dto/escrow-tx.dto';
 import * as xrpl from 'xrpl';
 
 @Injectable()
@@ -161,5 +161,18 @@ export class CrowdFundingService {
       }
       throw new InternalServerErrorException('Failed to process escrow transaction');
     }
+  }
+
+  async createEscrow(createEscrowTxDto: CreateEscrowTxDto){
+    const { userId, crowdId, amount } = createEscrowTxDto
+
+    const escrow = this.escrowRepository.create({
+        userId: userId,
+        crowdId: crowdId,
+        amount: amount,
+      });
+
+      const savedEscrow = await this.escrowRepository.save(escrow);
+      return savedEscrow;
   }
 }

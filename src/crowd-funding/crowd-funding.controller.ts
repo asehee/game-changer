@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CrowdFundingService } from './crowd-funding.service';
 import { CrowdFundingListDto } from './dto/crowd-funding-list.dto';
 import { CrowdFundingDetailDto } from './dto/crowd-funding-detail.dto';
-import { EscrowTxDto, EscrowTxResponseDto } from './dto/escrow-tx.dto';
+import { CreateEscrowTxDto, EscrowTxDto, EscrowTxResponseDto } from './dto/escrow-tx.dto';
 
 @ApiTags('crowd-funding')
 @Controller('api/crowd-funding')
@@ -44,5 +44,10 @@ export class CrowdFundingController {
   })
   async processEscrowTransaction(@Body() escrowTxDto: EscrowTxDto): Promise<EscrowTxResponseDto> {
     return this.crowdFundingService.processEscrowTransaction(escrowTxDto);
+  }
+
+  @Post('escrow')
+  async createEscrow(@Body()createEscrowTxDto:CreateEscrowTxDto){
+    return this.crowdFundingService.createEscrow(createEscrowTxDto);
   }
 }
