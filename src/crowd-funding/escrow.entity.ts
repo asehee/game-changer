@@ -15,7 +15,7 @@ export class Escrow {
   @Column({ type: 'varchar', length: 255 })
   userId: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'bigint', unsigned: true })
   crowdId: string;
 
   @Column({ type: 'decimal', precision: 18, scale: 2 })
