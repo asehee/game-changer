@@ -32,22 +32,22 @@ GameChanger는 **Pay-Per-Time 결제, 투명한 크라우드펀딩, 광고 기�
 
 ## 🌟 Key Features & Innovation
 
-### 1. ⏱️ Pay-Per-Time Gaming System  
+### 1. Pay-Per-Time Gaming System  
 - 게임을 미리 구매하지 않아도 됨  
 - 플레이 시간만큼만 과금 → 재미없으면 중단 가능, 재미있으면 이어갈 수 있음  
 - 기존 정액제·패키지 모델을 **근본적으로 대체할 새로운 소비 방식**  
 
-### 2. ⚡ Instant Settlement for Developers  
+### 2. Instant Settlement for Developers  
 - XRPL을 통해 과금이 발생하는 즉시 정산  
 - 글로벌 인디 개발자도 **실시간으로 수익 확보 가능**  
 - 누구나 지속 가능한 게임 개발 가능  
 
-### 3. 📺 Ad-powered Fee Model  
+### 3. Ad-powered Fee Model  
 - XRPL 거래 수수료는 **광고 시청**으로 충당  
 - 유저는 추가 비용 없이 게임 플레이 가능  
 - 수수료 장벽을 제거해 **Web3 대중화** 촉진  
 
-### 4. 🔐 Trustless Crowdfunding  
+### 4. Trustless Crowdfunding  
 - 모든 후원금은 XRPL **TokenEscrow**에 조건부로 잠김  
 - 펀딩 종료 3일 전, 개발자는 **중간 산출물 제출**  
 - 후원자 투표 결과에 따라 **Finish(지급) 또는 Cancel(환불)** 결정  
@@ -55,7 +55,7 @@ GameChanger는 **Pay-Per-Time 결제, 투명한 크라우드펀딩, 광고 기�
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### Blockchain & Payment
 - **XRPL (XRP Ledger)** – Blockchain infrastructure  
@@ -69,5 +69,5 @@ GameChanger는 **Pay-Per-Time 결제, 투명한 크라우드펀딩, 광고 기�
 
 ---
 
-## 👥 Team & Contributors
+## Team & Contributors
 - **AHSKNUE**
