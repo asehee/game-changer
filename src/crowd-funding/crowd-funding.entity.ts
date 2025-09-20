@@ -11,10 +11,10 @@ export class CrowdFunding {
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
   id: string;
 
-  @Column({ type: 'bigint', unsigned: true })
+  @Column({ type: 'varchar', length: 255 })
   gameId: string;
 
-  @Column({ type: 'bigint', unsigned: true })
+  @Column({ type: 'varchar', length: 255 })
   developerId: string;
 
   @Column({ type: 'decimal', precision: 18, scale: 2 })

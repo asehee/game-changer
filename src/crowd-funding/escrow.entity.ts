@@ -12,10 +12,10 @@ export class Escrow {
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
   id: string;
 
-  @Column({ type: 'bigint', unsigned: true })
+  @Column({ type: 'varchar', length: 255 })
   userId: string;
 
-  @Column({ type: 'bigint', unsigned: true })
+  @Column({ type: 'varchar', length: 255 })
   crowdId: string;
 
   @Column({ type: 'decimal', precision: 18, scale: 2 })

@@ -59,6 +59,7 @@ export class CrowdFundingController {
   async sendBatchFinish(@Body() batchFinishDto: BatchFinishRequestDto): Promise<BatchFinishResponseDto> {
     return this.crowdFundingService.sendBatchFinish(batchFinishDto);
   }
+  
   @Post('batchCancel')
   @ApiOperation({
     summary: 'batch cancel tx 제출',
