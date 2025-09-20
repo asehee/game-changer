@@ -27,7 +27,7 @@ export class DevelopersService {
     private playSessionRepository: Repository<PlaySession>,
     private readonly configService: ConfigService,
   ) {
-    this.issuerAddress = this.configService.get<string>('ISSUER_ADDRESS', 'PORTrJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a');
+    this.issuerAddress = this.configService.get<string>('ISSUER_ADDRESS', 'rJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a');
     this.currencyCode = this.configService.get<string>('TOKEN_CURRENCY_CODE', 'USD');
     this.xrplClient = new xrpl.Client(this.configService.get<string>('TESTNET', 'wss://s.altnet.rippletest.net:51233'));
     this.xrplClient.connect().then(() => { this.logger.log('XRPL Client connected successfully.');});

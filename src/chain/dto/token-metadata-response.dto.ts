@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class TokenMetadataResponseDto {
   @ApiProperty({
     description: '토큰 발행자 주소',
-    example: 'PORTrJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a',
+    example: 'rJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a',
   })
   issuer_address: string;
 

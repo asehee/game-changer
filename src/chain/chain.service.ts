@@ -22,7 +22,7 @@ export class ChainService {
         this.logger.warn('Invalid SERVER_SEED, using dummy wallet');
         this.serverWallet = xrpl.Wallet.generate();
       }
-      this.issuerAddress = this.configService.get<string>('ISSUER_ADDRESS', 'PORTrJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a');
+      this.issuerAddress = this.configService.get<string>('ISSUER_ADDRESS', 'rJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a');
       this.currencyCode = this.configService.get<string>('TOKEN_CURRENCY_CODE', 'USD');
 
       this.xrplClient = new xrpl.Client(this.configService.get<string>('TESTNET', 'wss://s.altnet.rippletest.net:51233'));
@@ -31,7 +31,7 @@ export class ChainService {
 
   getTokenMetadata(): TokenMetadataResponseDto {
     return {
-      issuer_address: this.configService.get<string>('ISSUER_ADDRESS', 'PORTrJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a'),
+      issuer_address: this.configService.get<string>('ISSUER_ADDRESS', 'rJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a'),
       token_currency_code: this.configService.get<string>('TOKEN_CURRENCY_CODE', 'USD'),
       testnet: this.configService.get<string>('TESTNET', 'wss://s.altnet.rippletest.net:51233'),
       server_address: this.serverWallet.address,
@@ -83,7 +83,7 @@ export class ChainService {
     if (!user) {
       throw new NotFoundException('User not found');
     } 
-    const destinationAddress = user.tempWallet;
+    const destinationAddress = userWallet;
     const faucetAmount = this.configService.get<string>('FAUCET_AMOUNT', '20'); // 기본 100개 지급
 
     this.logger.log(`Dispensing ${faucetAmount} ${this.currencyCode} to ${destinationAddress}`);

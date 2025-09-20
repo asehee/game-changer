@@ -12,6 +12,7 @@ import { AssetsModule } from './assets/assets.module';
 import { BillingModule } from './billing/billing.module';
 import { ChainModule } from './chain/chain.module';
 import { DevelopersModule } from './developers/developers.module';
+import { CrowdFundingModule } from './crowd-funding/crowd-funding.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -43,6 +44,7 @@ import { join } from 'path';
     BillingModule,
     ChainModule,
     DevelopersModule,
+    CrowdFundingModule,
   ],
 })
 export class AppModule {}
