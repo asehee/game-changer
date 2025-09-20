@@ -8,13 +8,23 @@ import { Game } from '../games/game.entity';
 import { User } from '../users/user.entity';
 import { CrowdFundingListDto } from './dto/crowd-funding-list.dto';
 import { CrowdFundingDetailDto } from './dto/crowd-funding-detail.dto';
-import { CreateEscrowTxDto, EscrowTxDto, EscrowTxResponseDto } from './dto/escrow-tx.dto';
+import { EscrowTxDto, EscrowTxResponseDto } from './dto/escrow-tx.dto';
+import { BatchFinishRequestDto, BatchFinishResponseDto, BatchCancelRequestDto, BatchCancelResponseDto } from './dto/batch';
+import { encodeForSigning, encode } from 'ripple-binary-codec';
+import { sign as kpSign, deriveKeypair } from 'ripple-keypairs';
+import { CrowdFundingStatus } from './crowd-funding.entity'
 import * as xrpl from 'xrpl';
+
 
 @Injectable()
 export class CrowdFundingService {
   private readonly logger = new Logger(CrowdFundingService.name);
   private readonly xrplClient: xrpl.Client;
+  private readonly serverWallet: xrpl.Wallet;
+  private readonly issuerAddress: string;
+  private readonly currencyCode: string;
+  private readonly condition: string;
+  private readonly fulfillment: string;
 
   constructor(
     @InjectRepository(CrowdFunding)
@@ -27,10 +37,16 @@ export class CrowdFundingService {
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
   ) {
+    this.condition = this.configService.get<string>('CONDITION', 'cf');
+    this.fulfillment = this.configService.get<string>('FULFILLMENT', 'cf');
+    this.serverWallet = xrpl.Wallet.fromSeed(this.configService.get<string>('SERVER_SEED'));
+    this.issuerAddress = this.configService.get<string>('ISSUER_ADDRESS', 'rJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a');
+    this.currencyCode = this.configService.get<string>('TOKEN_CURRENCY_CODE', 'USD');
     this.xrplClient = new xrpl.Client(this.configService.get<string>('TESTNET', 'wss://s.altnet.rippletest.net:51233'));
     this.xrplClient.connect().then(() => { 
       this.logger.log('XRPL Client connected successfully.');
     });
+
   }
 
   async getCrowdFundingList(): Promise<CrowdFundingListDto[]> {
@@ -119,48 +135,270 @@ export class CrowdFundingService {
   }
 
   async processEscrowTransaction(escrowTxDto: EscrowTxDto): Promise<EscrowTxResponseDto> {
-    // 크라우드 펀딩 존재 확인
-    const crowdFunding = await this.crowdFundingRepository.findOne({
-      where: { id: escrowTxDto.crowdId }
-    });
-
-    if (!crowdFunding) {
-      throw new NotFoundException('Crowd funding not found');
-    }
-
-    // 사용자 존재 확인
-    const user = await this.userRepository.findOne({
-      where: { id: escrowTxDto.userId }
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
     try {
+        const crowdFunding = await this.crowdFundingRepository.findOne({
+            where: { id: escrowTxDto.crowdId }
+        });
+        if (!crowdFunding) {
+            throw new NotFoundException('Crowd funding not found');
+        }
 
-      // Escrow 테이블에 저장
-      const escrow = this.escrowRepository.create({
-        userId: escrowTxDto.userId,
-        crowdId: escrowTxDto.crowdId,
-        amount: escrowTxDto.amount,
-        sequence: 1, 
-      });
+        const user = await this.userRepository.findOne({
+            where: { id: escrowTxDto.userId }
+        });
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
 
-      const savedEscrow = await this.escrowRepository.save(escrow);
+        const developer = await this.userRepository.findOne({
+            where: { id: crowdFunding.developerId }
+        });
+        if (!developer) {  // developer로 수정
+            throw new NotFoundException('Developer not found');
+        }
 
-      return {
-        status: 'success',
-        escrowId: savedEscrow.id,
-      };
+        if (!user.tempWallet || !developer.wallet) {
+            throw new BadRequestException('user.tempWallet or developer.wallet information is missing');
+        }
 
+        if (!escrowTxDto.amount) {
+            throw new BadRequestException('Amount is required');
+        }
+
+        const escrowCreateTx: xrpl.EscrowCreate = {
+            TransactionType: "EscrowCreate",
+            Account: user.tempWallet,
+            Destination: developer.wallet,
+            Amount: {
+                currency: this.currencyCode,
+                issuer: this.issuerAddress,
+                value: escrowTxDto.amount,
+            },
+            Condition: this.condition,
+            FinishAfter: Math.floor(crowdFunding.endDate.getTime() / 1000) - 946684800 + 10,
+            CancelAfter: Math.floor(crowdFunding.endDate.getTime() / 1000) - 946684800 + 20000,
+        };
+
+        try {
+            const preparedTx = await this.xrplClient.autofill(escrowCreateTx);
+            
+            if (!this.serverWallet?.publicKey || !this.serverWallet?.seed) {
+                throw new InternalServerErrorException('Server wallet configuration is missing');
+            }
+
+            const txToSign = { ...preparedTx, SigningPubKey: this.serverWallet.publicKey };
+            const { privateKey } = deriveKeypair(this.serverWallet.seed);
+            const signingData = encodeForSigning(txToSign);
+            const signature = kpSign(signingData, privateKey);
+            const signedTx = { ...txToSign, TxnSignature: signature };
+
+            const tx_blob = encode(signedTx);
+            const escrowResult = await this.xrplClient.submitAndWait(tx_blob);
+            const sequence = preparedTx.Sequence;
+
+            const meta = escrowResult.result.meta;
+            if (typeof meta === 'object' && meta !== null && 'TransactionResult' in meta) {
+                if (meta.TransactionResult !== "tesSUCCESS") {
+                    this.logger.error('Payment transaction failed', { 
+                        error: escrowResult,
+                        userId: escrowTxDto.userId,
+                        crowdId: escrowTxDto.crowdId 
+                    });
+                    throw new InternalServerErrorException(`Payment failed: ${meta.TransactionResult}`);
+                }
+
+                // Escrow 테이블에 저장
+                const escrow = this.escrowRepository.create({
+                    userId: escrowTxDto.userId,
+                    crowdId: escrowTxDto.crowdId,
+                    amount: escrowTxDto.amount,
+                    sequence: sequence,
+                });
+
+                const savedEscrow = await this.escrowRepository.save(escrow);
+
+                return {
+                    status: 'success',
+                    escrowId: savedEscrow.id,
+                };
+            } else {
+                throw new InternalServerErrorException('Invalid transaction result format');
+            }
+
+        } catch (error) {
+            this.logger.error('XRPL transaction error', {
+                error,
+                userId: escrowTxDto.userId,
+                crowdId: escrowTxDto.crowdId
+            });
+            throw new InternalServerErrorException(
+                error.message || 'Failed to process XRPL transaction'
+            );
+        }
     } catch (error) {
-      this.logger.error(`Failed to process escrow transaction for user ${escrowTxDto.userId}`, error);
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Failed to process escrow transaction');
+        this.logger.error(`Failed to process escrow transaction`, {
+            error,
+            userId: escrowTxDto.userId,
+            crowdId: escrowTxDto.crowdId
+        });
+
+        if (error instanceof BadRequestException || 
+            error instanceof NotFoundException || 
+            error instanceof InternalServerErrorException) {
+            throw error;
+        }
+
+        throw new InternalServerErrorException('Failed to process escrow transaction');
     }
   }
 
+  async sendBatchCancel(batchCancelDto: BatchCancelRequestDto): Promise<BatchCancelResponseDto> {
+    const crowdFunding = await this.crowdFundingRepository.findOne({
+        where: { id: batchCancelDto.crowdId }
+    });
+    if (!crowdFunding) {
+        throw new NotFoundException('Crowd funding not found');
+    }
+
+    const escrows = await this.escrowRepository.find({
+        where: { crowdId: batchCancelDto.crowdId }
+    });
+
+    if (!escrows.length) {
+      throw new NotFoundException('Does not exsit any escrow');
+    }
+
+    console.log(`총 ${escrows.length}개의 EscrowFinish 트랜잭션을 준비합니다...`);
+    const rawTransactions = await Promise.all(
+      escrows.map(async (escrow) => {
+        try {
+            const user = await this.userRepository.findOne({ where: { id: escrow.userId }});
+            if (!user) {throw new NotFoundException(`User not found for escrow ID: ${escrow.id}`);}
+            if (!user.wallet) {throw new BadRequestException(`User wallet not set for escrow ID: ${escrow.id}`);}
+            if (!escrow.sequence) {throw new BadRequestException(`Sequence not found for escrow ID: ${escrow.id}`);}
+            return {
+                TransactionType: 'EscrowCancel',
+                Account: this.serverWallet.address,
+                Owner: user.wallet,
+                OfferSequence: escrow.sequence,
+                Fee: "0",
+                SigningPubKey: "",
+                Flags: 0x40000000
+            };
+        } catch (error) {
+            this.logger.error(`Error processing escrow ID: ${escrow.id}`, error);
+            throw error;
+        }
+      })
+    );
+  
+    const accountInfo = await this.xrplClient.request({command: "account_info", account: this.serverWallet.address});
+    const baseSequence = accountInfo.result.account_data.Sequence;
+
+    // create batch tx
+    const batchTx: any = {
+        TransactionType: "Batch",
+        Account: this.serverWallet.address,
+        Flags: 0x00080000, // 🔥 Independent 모드 플래그
+        Sequence: baseSequence,
+        RawTransactions: rawTransactions,
+    };
+
+    // 5. 서버 지갑으로 서명하고 제출합니다.
+    const result = await this.xrplClient.submitAndWait(batchTx, { wallet: this.serverWallet });
+    const meta = result.result.meta;
+    if (typeof meta === 'object' && meta !== null && 'TransactionResult' in meta) {
+      if (meta.TransactionResult !== "tesSUCCESS") {
+          this.logger.error('Payment transaction failed', { 
+              error: result,
+              crowdId: batchCancelDto.crowdId 
+          });
+          throw new InternalServerErrorException(`Payment failed: ${meta.TransactionResult}`);
+      } else {
+        crowdFunding.status = CrowdFundingStatus.FINISHED
+        await this.crowdFundingRepository.save(crowdFunding);
+
+        return {
+            status: 'success',
+            batchTx: result.result.hash,
+        };
+      }
+    }
+  }
+
+  async sendBatchFinish(batchFinishDto: BatchFinishRequestDto): Promise<BatchFinishResponseDto> {
+    const crowdFunding = await this.crowdFundingRepository.findOne({
+        where: { id: batchFinishDto.crowdId }
+    });
+    if (!crowdFunding) {
+        throw new NotFoundException('Crowd funding not found');
+    }
+
+    const escrows = await this.escrowRepository.find({
+        where: { crowdId: batchFinishDto.crowdId }
+    });
+
+    if (!escrows.length) {
+      throw new NotFoundException('Does not exsit any escrow');
+    }
+
+    console.log(`총 ${escrows.length}개의 EscrowFinish 트랜잭션을 준비합니다...`);
+    const rawTransactions = await Promise.all(
+      escrows.map(async (escrow) => {
+        try {
+            const user = await this.userRepository.findOne({ where: { id: escrow.userId }});
+            if (!user) {throw new NotFoundException(`User not found for escrow ID: ${escrow.id}`);}
+            if (!user.wallet) {throw new BadRequestException(`User wallet not set for escrow ID: ${escrow.id}`);}
+            if (!escrow.sequence) {throw new BadRequestException(`Sequence not found for escrow ID: ${escrow.id}`);}
+            return {
+                TransactionType: 'EscrowFinish',
+                Account: this.serverWallet.address,
+                Owner: user.wallet,
+                OfferSequence: escrow.sequence,
+                Condition: this.condition,
+                Fulfillment: this.fulfillment,
+                Fee: "0",
+                SigningPubKey: "",
+                Flags: 0x40000000
+            };
+        } catch (error) {
+            this.logger.error(`Error processing escrow ID: ${escrow.id}`, error);
+            throw error;
+        }
+      })
+    );
+  
+    const accountInfo = await this.xrplClient.request({command: "account_info", account: this.serverWallet.address});
+    const baseSequence = accountInfo.result.account_data.Sequence;
+
+    // create batch tx
+    const batchTx: any = {
+        TransactionType: "Batch",
+        Account: this.serverWallet.address,
+        Flags: 0x00080000, // 🔥 Independent 모드 플래그
+        Sequence: baseSequence,
+        RawTransactions: rawTransactions,
+    };
+
+    // 5. 서버 지갑으로 서명하고 제출합니다.
+    const result = await this.xrplClient.submitAndWait(batchTx, { wallet: this.serverWallet });
+    const meta = result.result.meta;
+    if (typeof meta === 'object' && meta !== null && 'TransactionResult' in meta) {
+      if (meta.TransactionResult !== "tesSUCCESS") {
+          this.logger.error('Payment transaction failed', { 
+              error: result,
+              crowdId: batchFinishDto.crowdId 
+          });
+          throw new InternalServerErrorException(`Payment failed: ${meta.TransactionResult}`);
+      } else {
+        crowdFunding.status = CrowdFundingStatus.FINISHED
+        await this.crowdFundingRepository.save(crowdFunding);
+
+        return {
+            status: 'success',
+            batchTx: result.result.hash,
+        };
+      }
+    }
+  }
 }

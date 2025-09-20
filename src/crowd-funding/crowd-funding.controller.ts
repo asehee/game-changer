@@ -3,7 +3,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CrowdFundingService } from './crowd-funding.service';
 import { CrowdFundingListDto } from './dto/crowd-funding-list.dto';
 import { CrowdFundingDetailDto } from './dto/crowd-funding-detail.dto';
-import { CreateEscrowTxDto, EscrowTxDto, EscrowTxResponseDto } from './dto/escrow-tx.dto';
+import { EscrowTxDto, EscrowTxResponseDto } from './dto/escrow-tx.dto';
+import { BatchFinishRequestDto, BatchFinishResponseDto, BatchCancelRequestDto, BatchCancelResponseDto } from './dto/batch';
 
 @ApiTags('crowd-funding')
 @Controller('api/crowd-funding')
@@ -36,7 +37,7 @@ export class CrowdFundingController {
   @Post('escrowTx')
   @ApiOperation({ 
     summary: '에스크로 트랜잭션 처리', 
-    description: '서명된 에스크로 트랜잭션을 XRPL에 제출하고 escrow 테이블에 저장합니다.' 
+    description: '에스크로 트랜잭션을 생성하여 서버가 서명하여 XRPL에 제출하고 escrow 테이블에 저장합니다.' 
   })
   @ApiResponse({ 
     status: 200, 
@@ -46,4 +47,28 @@ export class CrowdFundingController {
     return this.crowdFundingService.processEscrowTransaction(escrowTxDto);
   }
 
+  @Post('batchFinish')
+  @ApiOperation({ 
+    summary: 'batch finish tx 제출', 
+    description: 'batch finish tx를 제출하고 crowd funding상태를 업데이트' 
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: '에스크로 트랜잭션 처리 성공',
+  })
+  async sendBatchFinish(@Body() batchFinishDto: BatchFinishRequestDto): Promise<BatchFinishResponseDto> {
+    return this.crowdFundingService.sendBatchFinish(batchFinishDto);
+  }
+  @Post('batchCancel')
+  @ApiOperation({
+    summary: 'batch cancel tx 제출',
+    description: 'batch cancel tx를 제출하고 crowd funding상태를 업데이트'
+  })
+  @ApiResponse({
+    status: 200,
+    description: '에스크로 트랜잭션 처리 성공',
+  })
+  async sendBatchCancel(@Body() batchCancelDto: BatchCancelRequestDto): Promise<BatchCancelResponseDto> {
+    return this.crowdFundingService.sendBatchCancel(batchCancelDto);
+  }
 }
