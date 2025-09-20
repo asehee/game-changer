@@ -4,7 +4,7 @@ import { CrowdFundingService } from './crowd-funding.service';
 import { CrowdFundingListDto } from './dto/crowd-funding-list.dto';
 
 @ApiTags('crowd-funding')
-@Controller('crowd-funding')
+@Controller('api/crowd-funding')
 export class CrowdFundingController {
   constructor(private readonly crowdFundingService: CrowdFundingService) {}
 

@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Escrow } from './escrow.entity';
 
 export enum CrowdFundingStatus {
   IN_PROGRESS = 'in_progress',
@@ -43,4 +44,7 @@ export class CrowdFunding {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Escrow, escrow => escrow.crowdFunding)
+  escrows: Escrow[];
 }
