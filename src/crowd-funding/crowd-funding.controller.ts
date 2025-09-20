@@ -46,8 +46,4 @@ export class CrowdFundingController {
     return this.crowdFundingService.processEscrowTransaction(escrowTxDto);
   }
 
-  @Post('escrow')
-  async createEscrow(@Body()createEscrowTxDto:CreateEscrowTxDto){
-    return this.crowdFundingService.createEscrow(createEscrowTxDto);
-  }
 }

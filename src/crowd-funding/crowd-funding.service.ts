@@ -163,16 +163,4 @@ export class CrowdFundingService {
     }
   }
 
-  async createEscrow(createEscrowTxDto: CreateEscrowTxDto){
-    const { userId, crowdId, amount } = createEscrowTxDto
-
-    const escrow = this.escrowRepository.create({
-        userId: userId,
-        crowdId: crowdId,
-        amount: amount,
-      });
-
-      const savedEscrow = await this.escrowRepository.save(escrow);
-      return savedEscrow;
-  }
 }
