@@ -46,9 +46,9 @@ export class ChainController {
   @ApiResponse({ status: 200, description: '토큰 지급 성공' })
   @ApiResponse({ status: 400, description: '잘못된 요청' })
   @ApiResponse({ status: 500, description: '서버 내부 오류 또는 트랜잭션 실패' })
-  async sendTestTokenToTemp(
+  async tokenFaucet(
     @Body() tokenFaucetDto: TokenFaucetDto,
   ): Promise<{ status: string; hash: string; }> {
-    return this.chainService.sendTestTokenToTemp(tokenFaucetDto.walletAddress);
+    return this.chainService.tokenFaucet(tokenFaucetDto.walletAddress);
   }
 }

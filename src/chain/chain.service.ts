@@ -120,4 +120,47 @@ export class ChainService {
       throw new InternalServerErrorException(error.message);
     }
   }
+
+  async tokenFaucet(userWallet: string): Promise<{ status: string; hash: string; }> {
+    const user = await this.usersService.findByWallet(userWallet);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    } 
+    const destinationAddress = userWallet;
+    const faucetAmount = this.configService.get<string>('FAUCET_AMOUNT', '20'); // 기본 100개 지급
+
+    this.logger.log(`Dispensing ${faucetAmount} ${this.currencyCode} to ${destinationAddress}`);
+
+    const paymentTx: xrpl.Payment = {
+      TransactionType: 'Payment',
+      Account: this.serverWallet.address,
+      Destination: destinationAddress,
+      Amount: {
+        issuer: this.issuerAddress,
+        currency: this.currencyCode,
+        value: faucetAmount,
+      },
+    };
+
+    try {
+      const result = await this.xrplClient.submitAndWait(paymentTx, { wallet: this.serverWallet });
+      
+      const meta = result.result.meta;
+      if (typeof meta === 'object' && meta !== null && 'TransactionResult' in meta) {
+        if (meta.TransactionResult !== "tesSUCCESS") {
+          this.logger.error('Payment transaction failed', result);
+          throw new ForbiddenException(`Payment failed: ${meta.TransactionResult}`);
+        }
+      } else {
+        this.logger.error('Payment transaction failed with unexpected metadata format', result);
+        throw new ForbiddenException('Payment failed due to an unexpected response format.');
+      }
+      this.logger.log(`Payment successful! Tx Hash: ${result.result.hash}`);
+      return {status: "Send Test Token Successfully", hash: result.result.hash}
+
+    } catch (error) {
+      this.logger.error('Failed to dispense faucet tokens', error);
+      throw new InternalServerErrorException(error.message);
+    }
+  }
 }
