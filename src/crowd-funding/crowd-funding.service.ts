@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -8,10 +8,13 @@ import { Game } from '../games/game.entity';
 import { User } from '../users/user.entity';
 import { CrowdFundingListDto } from './dto/crowd-funding-list.dto';
 import { CrowdFundingDetailDto } from './dto/crowd-funding-detail.dto';
+import { EscrowTxDto, EscrowTxResponseDto } from './dto/escrow-tx.dto';
+import * as xrpl from 'xrpl';
 
 @Injectable()
 export class CrowdFundingService {
   private readonly logger = new Logger(CrowdFundingService.name);
+  private readonly xrplClient: xrpl.Client;
 
   constructor(
     @InjectRepository(CrowdFunding)
@@ -23,7 +26,12 @@ export class CrowdFundingService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    this.xrplClient = new xrpl.Client(this.configService.get<string>('TESTNET', 'wss://s.altnet.rippletest.net:51233'));
+    this.xrplClient.connect().then(() => { 
+      this.logger.log('XRPL Client connected successfully.');
+    });
+  }
 
   async getCrowdFundingList(): Promise<CrowdFundingListDto[]> {
     const crowdFundings = await this.crowdFundingRepository
@@ -108,5 +116,50 @@ export class CrowdFundingService {
       endDate: crowdFunding.endDate.toISOString(),
       condition: condition,
     };
+  }
+
+  async processEscrowTransaction(escrowTxDto: EscrowTxDto): Promise<EscrowTxResponseDto> {
+    // 크라우드 펀딩 존재 확인
+    const crowdFunding = await this.crowdFundingRepository.findOne({
+      where: { id: escrowTxDto.crowdId }
+    });
+
+    if (!crowdFunding) {
+      throw new NotFoundException('Crowd funding not found');
+    }
+
+    // 사용자 존재 확인
+    const user = await this.userRepository.findOne({
+      where: { id: escrowTxDto.userId }
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    try {
+
+      // Escrow 테이블에 저장
+      const escrow = this.escrowRepository.create({
+        userId: escrowTxDto.userId,
+        crowdId: escrowTxDto.crowdId,
+        amount: escrowTxDto.amount,
+        sequence: 1, 
+      });
+
+      const savedEscrow = await this.escrowRepository.save(escrow);
+
+      return {
+        status: 'success',
+        escrowId: savedEscrow.id,
+      };
+
+    } catch (error) {
+      this.logger.error(`Failed to process escrow transaction for user ${escrowTxDto.userId}`, error);
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to process escrow transaction');
+    }
   }
 }
