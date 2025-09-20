@@ -274,12 +274,12 @@ export class CrowdFundingService {
         try {
             const user = await this.userRepository.findOne({ where: { id: escrow.userId }});
             if (!user) {throw new NotFoundException(`User not found for escrow ID: ${escrow.id}`);}
-            if (!user.wallet) {throw new BadRequestException(`User wallet not set for escrow ID: ${escrow.id}`);}
+            if (!user.tempWallet) {throw new BadRequestException('user.tempWallet information is missing');}
             if (!escrow.sequence) {throw new BadRequestException(`Sequence not found for escrow ID: ${escrow.id}`);}
             return {
                 TransactionType: 'EscrowCancel',
                 Account: this.serverWallet.address,
-                Owner: user.wallet,
+                Owner: user.tempWallet,
                 OfferSequence: escrow.sequence,
                 Fee: "0",
                 SigningPubKey: "",
@@ -348,12 +348,12 @@ export class CrowdFundingService {
         try {
             const user = await this.userRepository.findOne({ where: { id: escrow.userId }});
             if (!user) {throw new NotFoundException(`User not found for escrow ID: ${escrow.id}`);}
-            if (!user.wallet) {throw new BadRequestException(`User wallet not set for escrow ID: ${escrow.id}`);}
+            if (!user.tempWallet) {throw new BadRequestException('user.tempWallet information is missing');}
             if (!escrow.sequence) {throw new BadRequestException(`Sequence not found for escrow ID: ${escrow.id}`);}
             return {
                 TransactionType: 'EscrowFinish',
                 Account: this.serverWallet.address,
-                Owner: user.wallet,
+                Owner: user.tempWallet,
                 OfferSequence: escrow.sequence,
                 Condition: this.condition,
                 Fulfillment: this.fulfillment,
