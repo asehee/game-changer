@@ -49,6 +49,7 @@ export class ChainController {
   async tokenFaucet(
     @Body() tokenFaucetDto: TokenFaucetDto,
   ): Promise<{ status: string; hash: string; }> {
+    console.log(tokenFaucetDto.walletAddress)
     return this.chainService.tokenFaucet(tokenFaucetDto.walletAddress);
   }
 }

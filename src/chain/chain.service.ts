@@ -121,12 +121,13 @@ export class ChainService {
     }
   }
 
-  async tokenFaucet(userWallet: string): Promise<{ status: string; hash: string; }> {
-    const user = await this.usersService.findByWallet(userWallet);
+  async tokenFaucet(walletAddress: string): Promise<{ status: string; hash: string; }> {
+    const user = await this.usersService.findByWallet(walletAddress);
     if (!user) {
       throw new NotFoundException('User not found');
     } 
-    const destinationAddress = userWallet;
+    this.logger.log(walletAddress)
+    const destinationAddress = walletAddress;
     const faucetAmount = this.configService.get<string>('FAUCET_AMOUNT', '20'); // 기본 100개 지급
 
     this.logger.log(`Dispensing ${faucetAmount} ${this.currencyCode} to ${destinationAddress}`);
