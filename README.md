@@ -63,7 +63,7 @@
 ---
 ### Key Screens
 **Main**
-<img width="768" height="927" alt="image" src="https://github.com/user-attachments/assets/7ac57076-9ac4-4753-9516-d50efd478213" />
+<br> <img width="768" height="927" alt="image" src="https://github.com/user-attachments/assets/7ac57076-9ac4-4753-9516-d50efd478213" />
 
 **MyPage**
 <img width="805" height="768" alt="image" src="https://github.com/user-attachments/assets/79376863-43d2-439c-807a-a0829b5077f9" />
