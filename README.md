@@ -64,12 +64,12 @@
 ---
 
 ### Skill Set
-Framework: NestJS
-Runtime: Node.js
-Database: MySQL
-ORM: TypeORM
-Network: XRPL
-Library: xrpl.js
+- Framework: NestJS
+- Runtime: Node.js
+- Database: MySQL
+- ORM: TypeORM
+- Network: XRPL
+- Library: xrpl.js
 
 ---
 
