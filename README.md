@@ -66,22 +66,20 @@
 <br> <img width="768" height="927" alt="image" src="https://github.com/user-attachments/assets/7ac57076-9ac4-4753-9516-d50efd478213" />
 
 **MyPage**
-<img width="805" height="768" alt="image" src="https://github.com/user-attachments/assets/79376863-43d2-439c-807a-a0829b5077f9" />
+<br> <img width="805" height="768" alt="image" src="https://github.com/user-attachments/assets/79376863-43d2-439c-807a-a0829b5077f9" />
 
 **Game**
-<img width="903" height="768" alt="image" src="https://github.com/user-attachments/assets/987986d5-4b90-4bb1-96c3-e21875535d49" />
+<br> <img width="903" height="768" alt="image" src="https://github.com/user-attachments/assets/987986d5-4b90-4bb1-96c3-e21875535d49" />
 
 **AD**
-<img width="1209" height="768" alt="image" src="https://github.com/user-attachments/assets/4b279ccf-7c09-459d-a115-6e9adf2a715a" />
+<br> <img width="1209" height="768" alt="image" src="https://github.com/user-attachments/assets/4b279ccf-7c09-459d-a115-6e9adf2a715a" />
 
 **Crowd Funding**
-<img width="805" height="531" alt="image" src="https://github.com/user-attachments/assets/d2be2439-3131-4cfd-a91c-026215378f08" />
+<br> <img width="805" height="531" alt="image" src="https://github.com/user-attachments/assets/d2be2439-3131-4cfd-a91c-026215378f08" />
 
 **Admin**
-<img width="1349" height="759" alt="image" src="https://github.com/user-attachments/assets/bcea040d-0b12-4964-ae1e-2863446974fc" />
+<br> <img width="1349" height="759" alt="image" src="https://github.com/user-attachments/assets/bcea040d-0b12-4964-ae1e-2863446974fc" />
 
-**Token**
-![Uploading image.png…]()
 
 ## Team & Contributors
 - **AHSKNUE**
