@@ -75,7 +75,10 @@
 
 ### Key Screens
 **Main**
-<br> <img width="768" height="927" alt="image" src="https://github.com/user-attachments/assets/7ac57076-9ac4-4753-9516-d50efd478213" />
+![real_en_funding mp4](https://github.com/user-attachments/assets/0e29f0c0-79cd-4096-bfac-196abfc0fdce)
+
+**Play**
+![real_en_funding mp4 (1)](https://github.com/user-attachments/assets/ffd73c44-0f7e-4938-af7e-a93b77d2120b)
 
 **MyPage**
 <br> <img width="805" height="768" alt="image" src="https://github.com/user-attachments/assets/79376863-43d2-439c-807a-a0829b5077f9" />
