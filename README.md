@@ -60,7 +60,19 @@
 - 중간 결과물을 보고 후원자들이 오프체인 투표를 실행
 - 투표 결과에 따라 서버가 후원자들(충전지갑)에게 위임 받은 권한으로 finish or cancel
 - escrow의 finish / cancel 는 batch transaction을 활용하여 일괄 처리
+
 ---
+
+### Skill Set
+Framework: NestJS
+Runtime: Node.js
+Database: MySQL
+ORM: TypeORM
+Network: XRPL
+Library: xrpl.js
+
+---
+
 ### Key Screens
 **Main**
 <br> <img width="768" height="927" alt="image" src="https://github.com/user-attachments/assets/7ac57076-9ac4-4753-9516-d50efd478213" />
