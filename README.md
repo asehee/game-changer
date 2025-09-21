@@ -1,32 +1,19 @@
-# GameChanger Platform - Backend API
+# GameChanger Platform - Frontend
+<img width="1276" height="718" alt="image" src="https://github.com/user-attachments/assets/9a50c0cd-f00a-4ec5-a9cb-fd2ec9a605a9" />
 
 ## 🎮 Project Overview
-**GameChanger**는 Web3의 복잡한 사용자 경험과, 크라우드펀딩에서 **개발자가 자금을 수령한 뒤 프로젝트를 중단하는 신뢰성 문제**를 동시에 해결하는 **XRPL 기반 게이밍 & 펀딩 플랫폼**입니다.  
-
-- **사용자**는 Web2처럼 편리하게 게임을 즐기면서, 실제로 플레이한 시간만큼만 비용을 지불합니다.  
-- **개발자**는 XRPL의 에스크로(Escrow)와 배치(Batch) 기능을 통해 안전하고 투명하게 펀딩을 받고, 수익을 실시간으로 정산받을 수 있습니다.  
-
-GameChanger는 **Pay-Per-Time 결제, 투명한 크라우드펀딩, 광고 기반 수수료 절감**을 통해 기존 게임 플랫폼의 문제를 근본적으로 해결하며, XRPL(XRP Ledger)을 활용해 **공정하고 지속 가능한 게임 생태계**를 만들어 갑니다.  
+게임 플레이 시간당 실시간 과금부터 개발자에게 직접 지급까지! "충전 지갑" 위임을 통해 결제 시 매번 서명해야 하는 번거로움은 줄이고, 자산 유출 위험은 안전하게 차단합니다. 또한 조건 기반 Escrow 트랜잭션으로 먹튀 걱정 없는 신뢰성 높은 크라우드 펀딩을 실현하여, 인디 개발자부터 글로벌 유저까지 아우르는 새로운 기회로 게임 시장을 확 바꿀 Game Changer!
 
 ---
 
 ## 🚩 Problems We Solve
-1. **사용자 경험 문제**  
-   - Web3 게임은 플레이할 때마다 지갑 팝업과 서명이 반복 → 몰입감 저하, 이탈률 증가  
+우리는 게임을 사랑하지만, 그 이면에는 게이머와 개발자 모두가 감수해야 하는 불편한 현실이 존재합니다.
 
-2. **과금 구조 문제**  
-   - 기존 게임은 미리 구매해야만 플레이 가능  
-   - 재미없으면 금전적·시간적 손실 발생  
-   - 부분 유료화 모델은 과금 유도 중심으로 사용자 불만 심화  
+**게이머의 불편함**: 7만 원을 결제한 게임이 30분 만에 실망스러웠던 경험, 누구나 한 번쯤은 겪어봤을 겁니다. 재미있을지 확신도 없는 게임을 '선구매'하고, 복잡한 환불 절차를 거쳐야 하는 불편함은 여전합니다. 해외 플랫폼이라면 비싼 수수료의 해외 결제 장벽까지 넘어야 합니다.
 
-3. **개발자 수익 구조 문제**  
-   - 스팀 같은 플랫폼은 **30% 수준의 과도한 수수료**  
-   - 정산이 수주~수개월 지연되어 인디 개발자의 현금 흐름 악화  
+**개발자의 고충**: 이러한 불편함은 사실, 개발자들이 겪는 더 큰 문제에서 시작됩니다. 기존 플랫폼들은 30%에 달하는 높은 수수료를 가져가고, 개발자는 몇 달을 기다려 늦은 정산을 받습니다. 특히 자금을 모으기 어려운 인디 개발자들은 크라우드펀딩에 의존하지만, 후원자들은 언제든 발생할 수 있는 '먹튀' 가능성에 불안해합니다.
 
-4. **크라우드펀딩 신뢰성 문제**  
-   - 개발자가 자금만 받고 프로젝트를 중단하는 사례 발생  
-   - 후원자는 진행 상황을 알 수 없고 환불도 불가능  
-   - “먹튀” 문제로 크라우드펀딩 신뢰도가 낮음  
+결국 이는 게이머와 개발자 모두를 위한 신뢰와 효율성이 부족한 악순환입니다.
 
 ---
 
@@ -55,19 +42,46 @@ GameChanger는 **Pay-Per-Time 결제, 투명한 크라우드펀딩, 광고 기�
 
 ---
 
-## Technology Stack
+## Technology 
+<img width="1365" height="768" alt="image" src="https://github.com/user-attachments/assets/0a10e4fc-1414-4b51-9d93-123eb350e296" />
 
-### Blockchain & Payment
-- **XRPL (XRP Ledger)** – Blockchain infrastructure  
-- **xrpl.js** – XRP Ledger JavaScript library  
+### 충전 지갑(charged wallet) 모델
+- 사용자는 익스텐션 지갑을 사용하여 단 2번의 서명 (충전 지갑 활성화를 위한 xrp지불, 토큰 충전을 위한 지불)
+- 충전지갑은 프론트엔드에서 생성되어, 충전지갑의 시드는 token trust set, signer list set서명에 사용되며, 절대 서버에 전달되지 않음
+- signer list set 트랜잭션으로 사용자 지갑, 서버 지갑에게 권한 위임
 
-### Backend Features
-- **세션 기반 JWT 인증** – 5분 롤링 토큰 방식  
-- **하트비트 메커니즘** – 세션 지속성 모니터링 (30초 간격)  
-- **Range 스트리밍** – 세션 검증과 함께 게임 에셋 스트리밍  
-- **빌링 연동** – XRPL 기반 실시간 결제 시스템  
+### 시간당 과금
+- 서명 권한 위임 (SignerListSet): 충전 지갑의 서명 권한을 사용자와 서버에게 공동으로 위임하여, 개인키 노출 없이 안전한 자동 결제 가능.
+- 세션 토큰 기반 하트비트 결제: 유효한 세션 토큰으로 인증된 프론트엔드의 주기적인 하트비트 신호에 따라, 충전지갑의 남은 잔액을 확인하고, 서버가 위임받은 권한으로 플레이 요금을 자동으로 네트워크에 제출.
 
+### 조건부 토큰 에스크로와 batch를 사용한 크라우드 펀딩
+- 후원금은 개발자에게 직접 전달되지 않고, XRPL 에스크로에 투명하게 보관
+- 에스크로 Condition, Fulfillment 관리는 서버가 담당
+- 중간 결과물을 보고 후원자들이 오프체인 투표를 실행
+- 투표 결과에 따라 서버가 후원자들(충전지갑)에게 위임 받은 권한으로 finish or cancel
+- escrow의 finish / cancel 는 batch transaction을 활용하여 일괄 처리
 ---
+### Key Screens
+**Main**
+<img width="768" height="927" alt="image" src="https://github.com/user-attachments/assets/7ac57076-9ac4-4753-9516-d50efd478213" />
+
+**MyPage**
+<img width="805" height="768" alt="image" src="https://github.com/user-attachments/assets/79376863-43d2-439c-807a-a0829b5077f9" />
+
+**Game**
+<img width="903" height="768" alt="image" src="https://github.com/user-attachments/assets/987986d5-4b90-4bb1-96c3-e21875535d49" />
+
+**AD**
+<img width="1209" height="768" alt="image" src="https://github.com/user-attachments/assets/4b279ccf-7c09-459d-a115-6e9adf2a715a" />
+
+**Crowd Funding**
+<img width="805" height="531" alt="image" src="https://github.com/user-attachments/assets/d2be2439-3131-4cfd-a91c-026215378f08" />
+
+**Admin**
+<img width="1349" height="759" alt="image" src="https://github.com/user-attachments/assets/bcea040d-0b12-4964-ae1e-2863446974fc" />
+
+**Token**
+![Uploading image.png…]()
 
 ## Team & Contributors
 - **AHSKNUE**
