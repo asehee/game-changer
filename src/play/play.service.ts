@@ -45,12 +45,10 @@ export class PlayService {
       try {
         this.serverWallet = xrpl.Wallet.fromSeed(this.configService.get<string>('SERVER_SEED'));
       } catch (error) {
-        this.logger.warn('Invalid SERVER_SEED, using dummy wallet');
         this.serverWallet = xrpl.Wallet.generate();
       }
       this.issuerAddress = this.configService.get<string>('ISSUER_ADDRESS', 'rJLaRNS4NMt8ZM8VJSiBN8sAPnnRupR77a');
       this.currencyCode = this.configService.get<string>('TOKEN_CURRENCY_CODE', 'USD');
-      //서비스가 초기화될 때 XRPL 클라이언트를 생성하고 연결
       this.xrplClient = new xrpl.Client(this.configService.get<string>('TESTNET', 'wss://s.altnet.rippletest.net:51233'));
       this.xrplClient.connect().then(() => { this.logger.log('XRPL Client connected successfully.');});
       this.ttlSeconds = this.configService.get<number>('SESSION_JWT_TTL_SEC', 300);
